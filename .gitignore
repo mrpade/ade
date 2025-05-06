@@ -1,0 +1,14 @@
+# Node modules
+**/node_modules/
+
+# Env files
+**/.env
+
+# Logs
+**/*.log
+
+# Vite cache
+ade-frontend/node_modules/.vite/
+
+# Mac OS
+.DS_Store
