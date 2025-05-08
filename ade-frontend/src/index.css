@@ -1,12 +1,17 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --primary-color: #166635;
+  --secondary-color: #fff;
+  --tertiary-color: #121310;
+  font-family: "Poppins", Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  background-color: #f7f7f7;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -16,37 +21,111 @@
 
 
 /* Reset/minimal */
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0; }
 body {
-  font-family: system-ui, sans-serif;
   background-color: #f7f7f7;
   color: #333;
   line-height: 1.4;
 }
+h1, h2, h3, h4, h5, h6 {
+  margin-bottom: 1rem;
+}
+input{
+  background-color: #fff;
+  color: #333;
+  font-family: "Poppins", Arial, sans-serif;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+input::placeholder{
+  color: #999;
+}
+input[type="date"]{
+  color: #999;}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.6;
+}
+button{
+  margin: auto;
+  padding: 0.75rem 1rem;
+  background-color: #0a7f3b;
+  color: #fff;
+  text-decoration: none;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color .5s ease;
+}
 
 /* Navbar */
 .navbar {
+  width: 80%;
+  border-radius: 10px;
+  margin: 10px auto;
   background: #fff;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  padding: 0.75rem 1.5rem;
+  padding: 20px 40px;
   display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 1rem;
 }
-.navbar a {
-  color: #555;
+.navbar__logo img {
+  height: 25px;          /* ajuste à la hauteur désirée */
+  width: auto;
+}
+.navbar__links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Style des liens */
+.navbar__link {
+  color: var(--tertiary-color);
   text-decoration: none;
   font-weight: 500;
 }
-.navbar a.active {
+
+.navbar__link:hover {
   color: #0a7f3b;
+}
+
+/* Lien actif */
+.navbar__link.active {
+  color: var(--primary-color);
   font-weight: 700;
+}
+.navbar__link--button{
+  margin: auto;
+  padding: 0.75rem 1rem;
+  background-color: #0a7f3b;
+  color: #fff;
+  text-decoration: none;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color .5s ease;
+}
+.navbar__link--button:hover {
+  background-color: #d8125a;
 }
 
 /* Container pour les pages */
 .container {
-  max-width: 800px;
+  max-width: 75%;
   margin: 2rem auto;
-  padding: 0 1rem;
+  padding: 2rem 1rem;
 }
 
 /* Formulaire de recherche */
@@ -55,19 +134,9 @@ body {
   gap: 0.5rem;
   margin-bottom: 1.5rem;
 }
-/*.search-form input {
-  flex: 1;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}*/
+
 .search-form button {
-  padding: 0.5rem 1rem;
-  background-color: #0a7f3b;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+  margin-left: 1rem;
 }
 .search-input {
   width: 100%;
@@ -111,3 +180,99 @@ body {
 .card p {
   margin-bottom: 0.25rem;
 }
+
+/*page inscription*/
+/* Conteneur en 2 colonnes */
+.register-page {
+  width: 50%;
+  margin: 25px auto;
+  display: flex;
+  justify-content: center;  /* centre le contenu horizontalement */
+  align-items: stretch;     /* permet à l’aside et à la section de s’étendre en hauteur */
+}
+
+/* Colonne verte */
+.register-page__aside {
+  flex: 0 0 40%;
+  max-width: 40%;
+  background-color: #166635;
+  color: #fff;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.register-page__aside h1 {
+  font-size: 2rem;
+}
+
+/* Colonne form */
+.register-page__form {
+  flex: 0 0 60%;
+  max-width: 60%;
+  padding: 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;   /* verticale */
+  margin: auto 0;
+  background-color: var(--secondary-color);
+}
+
+.register-page__form p {
+  color: #555;
+  margin-bottom: 1.5rem;
+}
+
+.register-page__form form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.register-page__form input {
+  padding: 0.75rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.register-page__form button {
+  width: 50%;
+  margin: auto;
+  padding: 0.75rem 1rem;
+  background-color: #0a7f3b;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color .5s ease;
+
+}
+
+.register-page__form button:hover {
+  background-color: #d8125a;
+}
+
+.form-error {
+  color: red;
+  font-size: 0.9rem;
+}
+
+/* Login page */
+.login-page {
+  width: 50%;
+  margin: 0 auto;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.auth-link {
+  margin-top: 1rem;
+}
+.error { color: #c00; }
+.info  { color: #080; }

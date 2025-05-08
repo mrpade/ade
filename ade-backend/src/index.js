@@ -15,9 +15,9 @@ const User = require('./models/User'); // nouveau modèle
 
 // 4. Routes
 const auth = require('./middleware/auth');
+const authRouter = require('./routes/auth');
 const maladiesRouter = require('./routes/maladies');        // route GET /api/maladies
 const symptomesRouter = require('./routes/symptomes');      // route GET /api/symptomes
-const authRouter = require('./routes/auth');
 const monCompteRouter  = require('./routes/moncompte')
 
 // 5. App Express
@@ -37,9 +37,10 @@ app.get('/', (req, res) => {
 /*app.use('/api/maladies', maladiesRouter);*/
 // protège la route moncompte par le middleware auth
 app.use('/api/moncompte', auth, monCompteRouter);
-app.use('/api/maladies', auth, maladiesRouter);
+app.use('/api/maladies', maladiesRouter);
 app.use('/api/symptomes', symptomesRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/auth', require('./routes/auth'));
 
 // 9. Connexion à la BDD, synchronisation des modèles, puis démarrage du serveur
 (async () => {

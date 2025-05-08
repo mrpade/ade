@@ -8,6 +8,7 @@ import Home     from './pages/Home';
 import Maladies from './pages/Maladies';
 import Register from './pages/Register';
 import Login from './pages/Login';
+import ResetPassword   from './pages/ResetPassword.jsx';
 import MonCompte from './pages/MonCompte';
 
 // (Optionnel) ton CSS global
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/reset/:token" element={<ResetPassword />} />
 
           {/* Page de recherche de maladies */}
           <Route path="/maladies" element={<Maladies />} />

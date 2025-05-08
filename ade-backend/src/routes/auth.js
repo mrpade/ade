@@ -1,23 +1,50 @@
 // src/routes/auth.js
+require('dotenv').config();
 const express = require('express');
-const bcrypt  = require('bcryptjs');
-const jwt     = require('jsonwebtoken');
-const router  = express.Router();
-const User    = require('../models/User');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
+
+const router = express.Router();
+const User = require('../models/User');
 const JWT_SECRET = process.env.JWT_SECRET;
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+// Configure transporter using Ethereal for testing
+let transporter;
+(async () => {
+  // Create a test SMTP service account from ethereal.email
+  const testAccount = await nodemailer.createTestAccount();
+  transporter = nodemailer.createTransport({
+    host: testAccount.smtp.host,
+    port: testAccount.smtp.port,
+    secure: testAccount.smtp.secure,
+    auth: {
+      user: testAccount.user,
+      pass: testAccount.pass
+    }
+  });
+})();
 
 // Enregistrement
 router.post('/register', async (req, res) => {
-  const { email, password, name } = req.body;
-  if (!email || !password) return res.status(400).json({ error: 'Email et mot de passe requis' });
-
+  const { email, password, first_name, last_name, birthdate, confirmPassword } = req.body;
+  if (!email || !password || !confirmPassword) {
+    return res.status(400).json({ error: 'Email, mot de passe et confirmation requis' });
+  }
+  if (password !== confirmPassword) {
+    return res.status(400).json({ error: 'Le mot de passe et sa confirmation ne correspondent pas' });
+  }
   try {
-    if (await User.findOne({ where: { email } }))
+    if (await User.findOne({ where: { email } })) {
       return res.status(409).json({ error: 'Email déjà utilisé' });
-
+    }
     const hash = await bcrypt.hash(password, 12);
-    const user = await User.create({ email, password_hash: hash, name });
-    res.status(201).json({ id: user.id, email: user.email, name: user.name });
+    const user = await User.create({ email, password_hash: hash, first_name, last_name, birthdate });
+    // Return JWT immediately
+    const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '12h' });
+    res.status(201).json({ token });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Erreur serveur' });
@@ -29,18 +56,69 @@ router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ where: { email } });
-    if (!user || !(await bcrypt.compare(password, user.password_hash)))
+    if (!user || !(await bcrypt.compare(password, user.password_hash))) {
       return res.status(401).json({ error: 'Identifiants invalides' });
-
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: '12h' }
-    );
+    }
+    const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '12h' });
     res.json({ token });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// Mot de passe oublié
+router.post('/forgot', async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).json({ error: 'Email inconnu' });
+    }
+    // Génération du token et expiration (1h)
+    const token = crypto.randomBytes(20).toString('hex');
+    const expires = new Date(Date.now() + 3600 * 1000);
+    await user.update({ reset_token: token, reset_expires: expires });
+    const resetLink = `${FRONTEND_URL}/reset/${token}`;
+    // Envoi de l'email
+    const info = await transporter.sendMail({
+      to: user.email,
+      subject: 'Réinitialisation de votre mot de passe',
+      html: `<p>Cliquez sur le lien suivant pour réinitialiser votre mot de passe (valable 1h):</p><p><a href="${resetLink}">${resetLink}</a></p>`
+    });
+    console.log('Password reset email sent. Preview URL: %s', nodemailer.getTestMessageUrl(info));
+    res.json({ message: 'Email de réinitialisation envoyé', previewUrl: nodemailer.getTestMessageUrl(info) });
+  } catch (err) {
+    console.error('[AUTH][FORGOT]', err);
+    res.status(500).json({ error: err.message || 'Erreur serveur lors de la demande' });
+  }
+});
+
+// Réinitialisation du mot de passe
+router.post('/reset', async (req, res) => {
+  const { token, password, confirmPassword } = req.body;
+  if (!password || !confirmPassword) {
+    return res.status(400).json({ error: 'Mot de passe et confirmation requis' });
+  }
+  if (password !== confirmPassword) {
+    return res.status(400).json({ error: 'Les mots de passe ne correspondent pas' });
+  }
+  try {
+    const user = await User.findOne({
+      where: {
+        reset_token: token,
+        reset_expires: { [require('sequelize').Op.gt]: new Date() }
+      }
+    });
+    if (!user) {
+      return res.status(400).json({ error: 'Token invalide ou expiré' });
+    }
+    const hash = await bcrypt.hash(password, 12);
+    await user.update({ password_hash: hash, reset_token: null, reset_expires: null });
+    res.json({ message: 'Mot de passe réinitialisé avec succès' });
+  } catch (err) {
+    console.error('[AUTH][RESET]', err);
+    res.status(500).json({ error: err.message || 'Erreur serveur lors de la réinitialisation' });
   }
 });
 

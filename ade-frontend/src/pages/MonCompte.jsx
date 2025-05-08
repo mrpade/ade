@@ -1,5 +1,5 @@
 // src/pages/MonCompte.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
@@ -28,9 +28,19 @@ export default function MonCompte() {
   return (
     <div className="container">
       <h1>Mon compte</h1>
-      <p><strong>Nom :</strong> {user.name || '—'}</p>
+      <p>
+       <strong>Nom :</strong>{' '}
+       {user.first_name || user.last_name
+         ? `${user.first_name || ''} ${user.last_name || ''}`.trim()
+         : '—'}
+     </p>
       <p><strong>Email :</strong> {user.email}</p>
-      <p><strong>Membre depuis :</strong> {new Date(user.createdAt).toLocaleDateString()}</p>
+      <p>
+       <strong>Membre depuis :</strong>{' '}
+       {user.createdAt
+         ? new Date(user.createdAt).toLocaleDateString()
+         : '—'}
+     </p>
       <button onClick={handleLogout}>Se déconnecter</button>
     </div>
   );
