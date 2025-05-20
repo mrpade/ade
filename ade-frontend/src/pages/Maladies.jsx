@@ -1,9 +1,8 @@
-
-// src/pages/Maladies.jsx
 // src/pages/Maladies.jsx
 import { useState, useEffect, useMemo } from 'react';
 import debounce from 'lodash.debounce';
 import api from '../services/api';
+/*import SymptomSearch from '../components/SymptomSearch';*/
 
 export default function Maladies() {
   const [query, setQuery]               = useState('');
@@ -11,6 +10,8 @@ export default function Maladies() {
   const [suggestions, setSuggestions]   = useState([]);
   const [showSug, setShowSug]           = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+
+
 
   // Extrait le dernier fragment (après la dernière virgule)
   const getLastTerm = q =>
@@ -80,6 +81,17 @@ export default function Maladies() {
         break;
     }
   };
+   // Perform search with given symptoms
+  /*async function handleSearch(symptome) {
+    try {
+      const { data } = await api.get('/maladies', {
+        params: { symptomes: symptome }
+      });
+      setResults(data);
+    } catch (err) {
+      console.error('Recherche maladies failed', err);
+    }
+  }*/
 
   const handleSearch = async e => {
     e.preventDefault();
@@ -142,3 +154,16 @@ export default function Maladies() {
     </div>
   );
 }
+
+ /*return (
+    <div>
+      <h1>Recherche de maladies</h1>
+      <SymptomSearch onSearch={handleSearch} />
+      <ul>
+        {results.map((m, idx) => (
+          <li key={m.id ?? idx}>{m.Nom} - Symptômes: {m.Symptomes}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}*/

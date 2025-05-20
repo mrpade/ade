@@ -10,7 +10,8 @@ import Register from './pages/Register';
 import Login from './pages/Login';
 import ResetPassword   from './pages/ResetPassword.jsx';
 import MonCompte from './pages/MonCompte';
-
+import Profile         from './pages/Profile.jsx';
+import DoctorDashboard from './pages/DoctorDashboard.jsx';
 // (Optionnel) ton CSS global
 import './index.css';
 
@@ -28,10 +29,10 @@ export default function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/reset/:token" element={<ResetPassword />} />
-
-          {/* Page de recherche de maladies */}
           <Route path="/maladies" element={<Maladies />} />
           <Route path="/moncompte" element={<MonCompte />} />
+          <Route path="/doctor"    element={<DoctorDashboard />} />
+          <Route path="/profile" element={<Profile />} />
 
           {/* Catch-all pour URL inconnues */}
           <Route
@@ -48,3 +49,7 @@ export default function App() {
     </BrowserRouter>
   );
 }
+
+/*<Route path="/pharmacy"  element={<PharmacyDashboard />} />
+          <Route path="/courier"   element={<CourierDashboard />} />
+          <Route path="/moncompte" element={<PatientDashboard />} />*/

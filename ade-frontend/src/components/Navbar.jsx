@@ -1,13 +1,14 @@
-
-// src/components/Navbar.jsx
-// src/components/Navbar.jsx
 import { useContext } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import logo from '../assets/logofullade.png';
 
 export default function Navbar() {
-  const { token, logout } = useContext(AuthContext);
+  const { token, role, logout } = useContext(AuthContext);
+  const dashboardLink = role === 'doctor' ? '/doctor'
+                      : role === 'pharmacy' ? '/pharmacy' 
+                      : role === 'courier' ? '/courier' 
+                      : '/moncompte';
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -22,6 +23,7 @@ export default function Navbar() {
       </NavLink>
 
       <div className="navbar__links">
+      
         <NavLink to="/maladies" className="navbar__link">Maladies</NavLink>
 
         {!token ? (
@@ -31,7 +33,7 @@ export default function Navbar() {
           </>
         ) : (
           <>
-            <NavLink to="/moncompte" className="navbar__link">Mon compte</NavLink>
+            <NavLink to={dashboardLink} className="navbar__link">Mon compte</NavLink>
             <button onClick={handleLogout}
               className="navbar__link--button">
               Déconnexion

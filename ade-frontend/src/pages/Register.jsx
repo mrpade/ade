@@ -3,6 +3,7 @@ import { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
+import PasswordStrengthMeter from '../components/PasswordStrengthMeter';
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -29,12 +30,12 @@ export default function Register() {
       const { data } = await api.post('/auth/register', form);
 
       // Si l'API renvoie un token, on connecte directement
-      if (data.token) {
-        login(data.token);
-        navigate('/moncompte');
-      } else {
-        // Sinon on redirige vers la page de login
-        navigate('/login');
+      if (data.token, data) {
+        login(data.token, data.role);
+        if (data.role === 'doctor')      navigate('/doctor');
+          else if (data.role === 'pharmacy') navigate('/pharmacy');
+          else if (data.role === 'courier')  navigate('/courier');
+          else                               navigate('/moncompte');
       }
     } catch (err) {
       setError(err.response?.data?.error || 'Erreur inscription');
@@ -106,6 +107,7 @@ export default function Register() {
             onChange={handleChange}
             required
           />
+          <PasswordStrengthMeter password={form.password} />
 
           <button type="submit">Créer mon compte</button>
           {error && <p className="form-error">{error}</p>}

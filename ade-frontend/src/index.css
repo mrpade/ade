@@ -33,6 +33,19 @@ body {
 h1, h2, h3, h4, h5, h6 {
   margin-bottom: 1rem;
 }
+.password-strength {
+  margin-top: 0.5rem;
+}
+.strength-bar {
+  height: 6px;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+.strength-text {
+  font-size: 0.875rem;
+  color: #555;
+  margin-top: 0.25rem;
+}
 input{
   background-color: #fff;
   color: #333;
@@ -63,6 +76,18 @@ button{
   font-weight: 600;
   cursor: pointer;
   transition: background-color .5s ease;
+}
+.spinner {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(0,0,0,0.2);
+  border-radius: 50%;
+  border-top-color: var(--primary-color);
+  animation: spin 1s ease-in-out infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 /* Navbar */

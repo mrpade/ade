@@ -3,10 +3,13 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('./index');
 
 const DiseasesList = sequelize.define('DiseasesList', {
+  id: {
+    type: DataTypes.INTEGER.UNSIGNED,
+    primaryKey: true,
+    autoIncrement: true },
   Nom: {
     type: DataTypes.STRING(255),
     allowNull: false,
-    primaryKey: true
   },
   Symptomes: {
     type: DataTypes.TEXT,

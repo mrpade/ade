@@ -1,5 +1,6 @@
 // src/routes/auth.js
 require('dotenv').config();
+const rateLimit = require('express-rate-limit');
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -7,9 +8,38 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
 const router = express.Router();
-const User = require('../models/User');
+const {User} = require('../models/User');
 const JWT_SECRET = process.env.JWT_SECRET;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+// Limitation par IP : max 5 requêtes / 15 minutes
+const forgotByIpLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5,
+  message: {
+    error: 'Trop de demandes de réinitialisation depuis cette IP, réessayez plus tard.'
+  }
+});
+
+// Limitation par email : max 3 requêtes / 24h
+const forgotByEmailLimiter = rateLimit({
+  windowMs: 24 * 60 * 60 * 1000, // 24 heures
+  max: 3,
+  keyGenerator: (req, res) => req.body.email,  // utilise l'email comme clé
+  message: {
+    error: 'Vous avez atteint le nombre maximal de demandes pour cet email. Réessayez demain.'
+  }
+});
+
+// Appliquer les deux sur la route POST /forgot :
+router.post(
+  '/forgot',
+  forgotByIpLimiter,
+  forgotByEmailLimiter,
+  async (req, res) => {
+    // logique existante
+  }
+);
 
 // Configure transporter using Ethereal for testing
 let transporter;
@@ -29,26 +59,17 @@ let transporter;
 
 // Enregistrement
 router.post('/register', async (req, res) => {
-  const { email, password, first_name, last_name, birthdate, confirmPassword } = req.body;
-  if (!email || !password || !confirmPassword) {
-    return res.status(400).json({ error: 'Email, mot de passe et confirmation requis' });
-  }
-  if (password !== confirmPassword) {
-    return res.status(400).json({ error: 'Le mot de passe et sa confirmation ne correspondent pas' });
-  }
   try {
-    if (await User.findOne({ where: { email } })) {
+    const { email, password, role = 'patient', first_name, last_name, birthdate } = req.body;
+    if (!email || !password) 
+      return res.status(400).json({ error: 'Email et mot de passe requis' });
+    if (await User.findOne({ where: { email } })) 
       return res.status(409).json({ error: 'Email déjà utilisé' });
-    }
     const hash = await bcrypt.hash(password, 12);
-    const user = await User.create({ email, password_hash: hash, first_name, last_name, birthdate });
-    // Return JWT immediately
-    const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '12h' });
-    res.status(201).json({ token });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erreur serveur' });
-  }
+    const user = await User.create({ email, password_hash: hash, role, first_name, last_name, birthdate });
+    const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: '12h' });
+    res.status(201).json({ token, role: user.role });
+  } catch (err) { res.status(500).json({ error: 'Erreur serveur' }); }
 });
 
 // Connexion
@@ -59,8 +80,8 @@ router.post('/login', async (req, res) => {
     if (!user || !(await bcrypt.compare(password, user.password_hash))) {
       return res.status(401).json({ error: 'Identifiants invalides' });
     }
-    const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '12h' });
-    res.json({ token });
+    const token = jwt.sign({ userId: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '12h' });
+    res.json({ token, role: user.role });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Erreur serveur' });

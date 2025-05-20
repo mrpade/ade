@@ -1,14 +1,4 @@
 // src/services/api.js
-/*import axios from 'axios';
-
-const api = axios.create({
-  // tu peux aussi définir VITE_API_URL dans un .env à la racine de ade-frontend
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
-});
-
-export default api;*/
-
-// src/services/api.js
 import axios from 'axios';
 
 // Crée une instance Axios avec l’URL de base de ton API

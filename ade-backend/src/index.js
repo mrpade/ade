@@ -1,11 +1,12 @@
-// src/index.js
-
 // 1. Variables d'environnement
 require('dotenv').config();
 
 // 2. Imports
 const express = require('express');
 const cors = require('cors');
+//const icdRoutes = require('./routes/icd'); // Import ICD routes
+// Lancement du cleanup cron
+require('./services/cleanup')
 
 // 3. ORM & modèles
 const sequelize = require('./models');
@@ -17,7 +18,8 @@ const User = require('./models/User'); // nouveau modèle
 const auth = require('./middleware/auth');
 const authRouter = require('./routes/auth');
 const maladiesRouter = require('./routes/maladies');        // route GET /api/maladies
-const symptomesRouter = require('./routes/symptomes');      // route GET /api/symptomes
+const symptomesRouter = require('./routes/symptomes');
+const doctorRoutes = require('./routes/doctor');      // route GET /api/symptomes
 const monCompteRouter  = require('./routes/moncompte')
 
 // 5. App Express
@@ -40,6 +42,7 @@ app.use('/api/moncompte', auth, monCompteRouter);
 app.use('/api/maladies', maladiesRouter);
 app.use('/api/symptomes', symptomesRouter);
 app.use('/api/auth', authRouter);
+app.use('/api', doctorRoutes); // route GET /api/doctors
 app.use('/api/auth', require('./routes/auth'));
 
 // 9. Connexion à la BDD, synchronisation des modèles, puis démarrage du serveur
@@ -63,3 +66,26 @@ app.use('/api/auth', require('./routes/auth'));
     process.exit(1);
   }
 })();
+
+// Update maladies route to sort by match count
+/*const { Op } = require('sequelize');
+const DiseasesList = require('./models/DiseasesList');
+app.get('/api/maladies', async (req, res) => {
+  const terms = req.query.symptomes
+    ? req.query.symptomes.split(',').map(s => s.trim().toLowerCase()).filter(Boolean)
+    : [];
+
+  try {
+    const diseases = await DiseasesList.findAll();
+    const scored = diseases.map(d => {
+      const text = d.Symptomes.toLowerCase();
+      const matchCount = terms.reduce((acc, t) => acc + (text.includes(t) ? 1 : 0), 0);
+      return { disease: d, matchCount };
+    });
+    scored.sort((a, b) => b.matchCount - a.matchCount);
+    res.json(scored.map(r => r.disease));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});*/

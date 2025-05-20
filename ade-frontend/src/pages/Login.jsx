@@ -5,50 +5,59 @@ import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 
 export default function Login() {
-  const [step, setStep]       = useState('login');   // 'login' ou 'forgot'
+  const [step, setStep]       = useState('login');
   const [email, setEmail]     = useState('');
   const [password, setPassword] = useState('');
   const [error, setError]     = useState('');
   const [info, setInfo]       = useState('');
+  const [loading, setLoading] = useState(false);
   const { login }             = useContext(AuthContext);
   const navigate              = useNavigate();
 
-  // Reset form & messages à chaque changement de step
   useEffect(() => {
     setEmail('');
     setPassword('');
     setError('');
     setInfo('');
+    setLoading(false);
   }, [step]);
 
-  // 1️⃣ Connexion classique
   const handleLogin = async e => {
     e.preventDefault();
     setError('');
+    setLoading(true);
     try {
       const { data } = await api.post('/auth/login', { email, password });
-      login(data.token);
-      navigate('/moncompte');
+      login(data.token, data.role);
+      if (data.role === 'doctor')      navigate('/doctor');
+        else if (data.role === 'pharmacy') navigate('/pharmacy');
+        else if (data.role === 'courier')  navigate('/courier');
+        else                               navigate('/moncompte'); // patient par défaut       // <-- redirection vers la page Profil
     } catch (err) {
       setError(err.response?.data?.error || 'Erreur de connexion');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // 2️⃣ Demande de lien de réinitialisation
   const handleForgot = async e => {
     e.preventDefault();
     setError('');
     setInfo('');
+    setLoading(true);
     try {
       const { data } = await api.post('/auth/forgot', { email });
       setInfo(`Email envoyé ! Ouvre ce lien de preview : ${data.previewUrl}`);
+      setLoading(false);
     } catch (err) {
       setError(err.response?.data?.error || 'Erreur lors de la demande');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="container">
+    <div className="container auth-container">
       {step === 'login' ? (
         <>
           <h1>Connexion</h1>
@@ -67,7 +76,8 @@ export default function Login() {
               onChange={e => setPassword(e.target.value)}
               required
             />
-            <button type="submit">Se connecter</button>
+            {!loading && <button type="submit">Se connecter</button>}
+            {loading && <span className="spinner" />}          
           </form>
           {error && <p className="error">{error}</p>}
           <p className="auth-link">
@@ -87,7 +97,8 @@ export default function Login() {
               onChange={e => setEmail(e.target.value)}
               required
             />
-            <button type="submit">Envoyer le lien</button>
+            {!loading && <button type="submit">Envoyer le lien</button>}
+            {loading && <span className="spinner" />}
           </form>
           {info && <p className="info">{info}</p>}
           {error && <p className="error">{error}</p>}

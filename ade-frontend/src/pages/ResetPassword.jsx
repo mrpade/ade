@@ -2,21 +2,23 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../services/api';
+import PasswordStrengthMeter from '../components/PasswordStrengthMeter';
 
 export default function ResetPassword() {
-  const [password, setPassword]         = useState('');
-  const [confirm, setConfirm]           = useState('');
-  const [error, setError]               = useState('');
-  const [info, setInfo]                 = useState('');
-  const { token }                       = useParams();
-  const navigate                        = useNavigate();
+  const [password, setPassword]   = useState('');
+  const [confirm, setConfirm]     = useState('');
+  const [error, setError]         = useState('');
+  const [info, setInfo]           = useState('');
+  const [loading, setLoading]     = useState(false);
+  const { token }                 = useParams();
+  const navigate                  = useNavigate();
 
-  // Clear messages when token changes
   useEffect(() => {
     setPassword('');
     setConfirm('');
     setError('');
     setInfo('');
+    setLoading(false);
   }, [token]);
 
   const handleSubmit = async e => {
@@ -26,17 +28,20 @@ export default function ResetPassword() {
       setError('Les mots de passe ne correspondent pas');
       return;
     }
+    setLoading(true);
     try {
       const { data } = await api.post('/auth/reset', { token, password, confirmPassword: confirm });
-      setInfo(data.message || 'Votre mot de passe a été réinitialisé ! Vous pouvez maintenant vous connecter.');
+      setInfo(data.message || 'Mot de passe réinitialisé !');
       setTimeout(() => navigate('/login'), 3000);
     } catch (err) {
       setError(err.response?.data?.error || 'Impossible de réinitialiser');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="container">
+    <div className="container auth-container">
       <h1>Réinitialiser le mot de passe</h1>
       <form onSubmit={handleSubmit} className="auth-form">
         <input
@@ -46,6 +51,7 @@ export default function ResetPassword() {
           onChange={e => setPassword(e.target.value)}
           required
         />
+        <PasswordStrengthMeter password={password} />
         <input
           type="password"
           placeholder="Confirmer mot de passe"
@@ -53,10 +59,11 @@ export default function ResetPassword() {
           onChange={e => setConfirm(e.target.value)}
           required
         />
-        <button type="submit">Valider</button>
+        {!loading && <button type="submit">Valider</button>}
+        {loading && <span className="spinner" />}
       </form>
       {info && <p className="info">{info}</p>}
       {error && <p className="error">{error}</p>}
     </div>
-  );
+  )
 }
