@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
-import { createDoctorProfile, toggleAvailability } from '../api/doctor';
+import { createDoctorProfile, toggleAvailability } from '../api/doctors';
 import './DoctorDashboard.css';
 
 export default function DoctorDashboard() {
@@ -14,9 +14,11 @@ export default function DoctorDashboard() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
+        console.log('🔍 Requête GET /api/doctors/me avec token:', token);
         const { data } = await api.get('/doctors/me', { headers: { Authorization: `Bearer ${token}` } });
         setProfile(data); // if 404, will throw and go to catch
-      } catch {
+      } catch (err) {
+        console.error('❌ fetchProfile error:', err.response?.status, err.response?.data, err);
         setProfile(null);
       }
     };

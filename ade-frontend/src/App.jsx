@@ -12,7 +12,6 @@ import ResetPassword   from './pages/ResetPassword.jsx';
 import MonCompte from './pages/MonCompte';
 import Profile         from './pages/Profile.jsx';
 import DoctorDashboard from './pages/DoctorDashboard.jsx';
-// (Optionnel) ton CSS global
 import './index.css';
 
 export default function App() {

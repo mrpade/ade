@@ -1,4 +1,3 @@
-// src/pages/Login.jsx
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
@@ -34,6 +33,7 @@ export default function Login() {
         else if (data.role === 'courier')  navigate('/courier');
         else                               navigate('/moncompte'); // patient par défaut       // <-- redirection vers la page Profil
     } catch (err) {
+      console.error('Erreur login:', err);
       setError(err.response?.data?.error || 'Erreur de connexion');
     } finally {
       setLoading(false);

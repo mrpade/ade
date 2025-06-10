@@ -4,14 +4,14 @@ require('dotenv').config();
 // 2. Imports
 const express = require('express');
 const cors = require('cors');
-//const icdRoutes = require('./routes/icd'); // Import ICD routes
 // Lancement du cleanup cron
 require('./services/cleanup')
 
 // 3. ORM & modèles
-const sequelize = require('./models');
+const { sequelize } = require('./models');
 const DiseasesList = require('./models/DiseasesList');
-const User = require('./models/User'); // nouveau modèle
+const { User } = require('./models');
+//const { sequelize, DiseasesList, User /* autres modèles nécessaires */ } = require('./models');
 
 
 // 4. Routes
@@ -19,15 +19,18 @@ const auth = require('./middleware/auth');
 const authRouter = require('./routes/auth');
 const maladiesRouter = require('./routes/maladies');        // route GET /api/maladies
 const symptomesRouter = require('./routes/symptomes');
-const doctorRoutes = require('./routes/doctor');      // route GET /api/symptomes
+const doctorRouter = require('./routes/doctors');      // route GET /api/symptomes
 const monCompteRouter  = require('./routes/moncompte')
+const userRouter = require('./routes/user'); // route GET /api/users
+
 
 // 5. App Express
 const app = express();
 const PORT = process.env.PORT || 4000;
 
 // 6. Middlewares
-app.use(cors());
+//app.use(cors());
+app.use(cors({ origin: 'http://localhost:5173' }));
 app.use(express.json());
 
 // 7. Route racine
@@ -42,8 +45,8 @@ app.use('/api/moncompte', auth, monCompteRouter);
 app.use('/api/maladies', maladiesRouter);
 app.use('/api/symptomes', symptomesRouter);
 app.use('/api/auth', authRouter);
-app.use('/api', doctorRoutes); // route GET /api/doctors
-app.use('/api/auth', require('./routes/auth'));
+app.use('/api/doctors', doctorRouter); // route GET /api/doctors
+app.use('/api/users', userRouter);
 
 // 9. Connexion à la BDD, synchronisation des modèles, puis démarrage du serveur
 (async () => {
