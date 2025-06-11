@@ -3,14 +3,14 @@
 const express = require('express');
 const { Op } = require('sequelize');
 const router = express.Router();
-const { DiseasesList } = require('../models/DiseasesList');
+const { DiseasesList } = require('../models');
 
 router.get('/', async (req, res) => {
   try {
     const { symptomes } = req.query;
 
-    // si pas de filtre, renvoyer tout (mais limiter à 5)
-    if (!symptomes) {
+    // si pas de filtre ou vide, renvoyer tout (mais limiter à 5)
+    if (!symptomes || symptomes.trim() === '') {
       const all = await DiseasesList.findAll({ limit: 5 });
       return res.json(all);
     }

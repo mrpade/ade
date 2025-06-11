@@ -8,7 +8,7 @@ module.exports = (req, res, next) => {
     return res.status(401).json({ error: 'Token manquant' });
 
   try {
-    //req.user = jwt.verify(auth[1], JWT_SECRET);
+    const payload = jwt.verify(auth[1], JWT_SECRET);
     req.user = { id: payload.id, role: payload.role };
     next();
   } catch {
