@@ -1,43 +1,9 @@
-// src/routes/maladies.js
-/*const express = require('express');
-const { Op } = require('sequelize');
-const router = express.Router();
-
-// importe le modèle avec le bon nom
-const DiseasesList = require('../models/DiseasesList');
-
-router.get('/', async (req, res) => {
-  const { symptomes } = req.query;
-  let where = {};
-
-  if (symptomes) {
-    const termes = symptomes
-      .split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
-
-    where = {
-      [Op.or]: termes.map(t => ({
-        Symptomes: { [Op.like]: `%${t}%` }
-      }))
-    };
-  }
-
-  try {
-    const results = await DiseasesList.findAll({ where });
-    res.json(results);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erreur serveur' });
-  }
-});
-
-module.exports = router;
-*/
 
 // src/routes/maladies.js
 const express = require('express');
 const { Op } = require('sequelize');
 const router = express.Router();
-const DiseasesList = require('../models/DiseasesList');
+const { DiseasesList } = require('../models/DiseasesList');
 
 router.get('/', async (req, res) => {
   try {

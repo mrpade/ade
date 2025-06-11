@@ -2,7 +2,7 @@
 const express = require('express');
 const { Op } = require('sequelize');
 const router = express.Router();
-const DiseasesList = require('../models/DiseasesList');
+const DiseasesList = require('../models');
 
 /**
  * GET /api/symptomes?q=fièv

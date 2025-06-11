@@ -1,7 +1,7 @@
 // src/routes/moncompte.js
 const express = require('express');
 const router  = express.Router();
-const User    = require('../models/User');
+const { User } = require('../models');
 
 // GET /api/moncompte  → renvoie les infos du user authentifié
 router.get('/', async (req, res) => {

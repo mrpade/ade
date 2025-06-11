@@ -8,9 +8,7 @@ const cors = require('cors');
 require('./services/cleanup')
 
 // 3. ORM & modèles
-const { sequelize } = require('./models');
-const DiseasesList = require('./models/DiseasesList');
-const { User } = require('./models');
+const { sequelize, DiseasesList, User } = require('./models');
 //const { sequelize, DiseasesList, User /* autres modèles nécessaires */ } = require('./models');
 
 
