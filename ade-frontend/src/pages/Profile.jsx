@@ -6,7 +6,7 @@ import api from '../services/api';
 import './Profile.css';
 
 export default function Profile() {
-  const { token, logout } = useContext(AuthContext);
+  const { logout } = useContext(AuthContext);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const memberSince = user ? new Date(user.createdAt).toLocaleDateString('fr-FR') : '';

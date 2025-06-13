@@ -48,6 +48,23 @@
 
 #profile-name{
     margin-block: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-indicator {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.status-indicator.green { background-color: #007f5f; }
+.status-indicator.red { background-color: #d8125a; }
+
+.btn.toggle {
+  margin-top: 10px;
 }
 
 #btn-edit, .btn-logout {

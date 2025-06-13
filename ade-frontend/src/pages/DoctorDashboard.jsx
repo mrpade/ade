@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
-import { createDoctorProfile } from '../api/doctors';
+import { createDoctorProfile, toggleAvailability } from '../api/doctors';
 import './DoctorDashboard.css';
 
 export default function DoctorDashboard() {
@@ -11,8 +11,8 @@ export default function DoctorDashboard() {
   const [form, setForm] = useState({ speciality: '', onmc: '', workplace: '', bio: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [checks, setChecks] = useState([]);
-  const [appointments, setAppointments] = useState([]);
+  const [checks] = useState([]);
+  const [appointments] = useState([]);
 
   useEffect(() => {
     if (!token) return;
@@ -67,6 +67,17 @@ export default function DoctorDashboard() {
     console.log('join appointment', id);
   };
 
+  const handleToggleAvailability = async () => {
+    if (!doctor) return;
+    const newStatus = !doctor.is_available;
+    try {
+      await toggleAvailability(newStatus);
+      setDoctor(d => ({ ...d, is_available: newStatus }));
+    } catch (err) {
+      console.error('toggle availability error', err);
+    }
+  };
+
   if (!token) return <p>Veuillez vous connecter.</p>;
 
   if (!doctor) {
@@ -91,8 +102,16 @@ export default function DoctorDashboard() {
           <div className="profile-pic">
             <img src="" alt="profile picture" />
           </div>
-          <h2 id='profile-name'>{user ? `${user.first_name} ${user.last_name}` : ''}</h2>
+          <h2 id='profile-name'>
+            {user ? `${user.first_name} ${user.last_name}` : ''}
+            <span
+              className={`status-indicator ${doctor.is_available ? 'green' : 'red'}`}
+            />
+          </h2>
           <p><i>ONMC No. {doctor.onmc}</i></p>
+          <button className="btn toggle" onClick={handleToggleAvailability}>
+            {doctor.is_available ? 'Se mettre hors ligne' : 'Se rendre disponible'}
+          </button>
           <button id="btn-edit">Éditer mon profil</button>
           <ul className="sidebar-menu">
             <li>Mes revenus</li>
