@@ -7,14 +7,14 @@ const { User } = require('../models');
 router.get('/', async (req, res) => {
   try {
     // req.user a été rempli par le middleware auth
-    const user = await User.findByPk(req.user.userId, {
+    const user = await User.findByPk(req.user.id, {
             attributes: [
               'id',
               'email',
               'first_name',
               'last_name',
               'birthdate',
-              'createdAt'  // ou 'createdAt' si tu utilises camelCase
+              'created_at'  // ou 'createdAt' si tu utilises camelCase
             ]
           });
     if (!user) return res.status(404).json({ error: 'Utilisateur non trouvé' });

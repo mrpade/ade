@@ -58,7 +58,7 @@ button{
   color: #fff;
   text-decoration: none;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -175,6 +175,12 @@ button{
   background-color: #e0f2f1;
 }
 
+/* Layout des cartes de résultats */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
 
 /* Carte de résultat */
 .card {
