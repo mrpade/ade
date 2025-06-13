@@ -1,29 +1,46 @@
 import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
-import { createDoctorProfile, toggleAvailability } from '../api/doctors';
+import { createDoctorProfile } from '../api/doctors';
 import './DoctorDashboard.css';
 
 export default function DoctorDashboard() {
-  const { token, _logout } = useContext(AuthContext);
-  const [profile, setProfile] = useState(null); // doctor row
+  const { token, logout } = useContext(AuthContext);
+  const [doctor, setDoctor] = useState(null);
+  const [user, setUser] = useState(null);
   const [form, setForm] = useState({ speciality: '', onmc: '', workplace: '', bio: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [checks, setChecks] = useState([]);
+  const [appointments, setAppointments] = useState([]);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    if (!token) return;
+
+    const fetchData = async () => {
       try {
-        console.log('🔍 Requête GET /api/doctors/me avec token:', token);
-        const { data } = await api.get('/doctors/me', { headers: { Authorization: `Bearer ${token}` } });
-        setProfile(data); // if 404, will throw and go to catch
+        const { data } = await api.get('/moncompte');
+        setUser(data);
       } catch (err) {
-        console.error('❌ fetchProfile error:', err.response?.status, err.response?.data, err);
-        setProfile(null);
+        console.error('Doctor dashboard user fetch error', err);
+        if (err.response?.status === 401) logout();
+      }
+
+      try {
+        const { data } = await api.get('/doctors/me');
+        setDoctor(data);
+      } catch (err) {
+        if (err.response?.status === 404) {
+          setDoctor(null);
+        } else {
+          console.error('Doctor dashboard fetch error', err);
+          if (err.response?.status === 401) logout();
+        }
       }
     };
-    fetchProfile();
-  }, [token]);
+
+    fetchData();
+  }, [token, logout]);
 
   const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
 
@@ -32,7 +49,7 @@ export default function DoctorDashboard() {
     setLoading(true);
     try {
       const { data } = await createDoctorProfile(form);
-      setProfile(data);
+      setDoctor(data);
     } catch (err) {
       setError(err.response?.data?.error || 'Erreur création profil');
     } finally {
@@ -40,22 +57,21 @@ export default function DoctorDashboard() {
     }
   };
 
-  const handleToggle = async e => {
-    const flag = e.target.checked;
-    try {
-      await toggleAvailability(flag);
-      setProfile(p => ({ ...p, is_available: flag }));
-    } catch {/* ignore */}
+  const handleValidate = id => {
+    console.log('validate check', id);
+  };
+  const handleStartConsult = pid => {
+    console.log('start consult', pid);
+  };
+  const handleJoinAppointment = id => {
+    console.log('join appointment', id);
   };
 
   if (!token) return <p>Veuillez vous connecter.</p>;
 
-  return (
-    <div className="doc-dashboard">
-      <h1>Tableau de bord Médecin</h1>
-
-      {/* Profil inexistant → formulaire */}
-      {!profile && (
+  if (!doctor) {
+    return (
+      <div className="doc-dashboard">
         <form className="doc-form" onSubmit={handleCreate}>
           <h2>Compléter votre profil</h2>
           <input name="speciality" placeholder="Spécialité" value={form.speciality} onChange={handleChange} required />
@@ -65,21 +81,78 @@ export default function DoctorDashboard() {
           <button disabled={loading}>{loading ? 'Enregistrement…' : 'Créer mon profil'}</button>
           {error && <p className="error">{error}</p>}
         </form>
-      )}
+      </div>
+    );
+  }
 
-      {/* Profil existant */}
-      {profile && (
-        <section>
-          <p><strong>ONMC :</strong> {profile.onmc}</p>
-          <p><strong>Spécialité :</strong> {profile.speciality}</p>
-          <p><strong>Lieu :</strong> {profile.workplace || '—'}</p>
-          <label className="switch">
-            <input type="checkbox" checked={profile.is_available} onChange={handleToggle} />
-            <span className="slider" />
-          </label>
-          <span>{profile.is_available ? 'Disponible pour consultation' : 'Indisponible'}</span>
+  return (
+    <div className="dashboard">
+      <div className="navbar">Tableau de bord</div>
+      <div className="main-content">
+        <aside className="sidebar">
+          <div className="profile-pic">Photo</div>
+          <h3>{user ? `${user.first_name} ${user.last_name}` : ''}</h3>
+          <p>{doctor.onmc}</p>
+          <button className="btn-edit">Éditer mon profil</button>
+          <ul className="sidebar-menu">
+            <li>Revenus</li>
+            <li>Historique</li>
+            <li>Paramètres</li>
+          </ul>
+          <button className="btn-logout" onClick={logout}>Déconnexion</button>
+        </aside>
+
+        <section className="dashboard-content">
+          <div className="section">
+            <h2>Checks en attente</h2>
+            {checks.length === 0 ? (
+              <div className="empty-state">Suspense…</div>
+            ) : (
+              <div className="card-grid">
+                {checks.map(check => (
+                  <div className="card" key={check.id}>
+                    <div className="card-header">
+                      <strong>{check.patientName}, {check.age}, {check.gender}</strong>
+                      <span className="badge green">Carnet</span>
+                    </div>
+                    <p>Symptômes : {check.symptoms}</p>
+                    <p>Résultat : {check.diagnosis}</p>
+                    <p>Notes : {check.notes}</p>
+                    <div className="card-actions">
+                      <button className="btn green" onClick={() => handleValidate(check.id)}>Valider</button>
+                      <button className="btn pink" onClick={() => handleStartConsult(check.patientId)}>Consultation/Diagnostic</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="section">
+            <h2>Mes Rendez-vous</h2>
+            {appointments.length === 0 ? (
+              <div className="empty-state">Suspense…</div>
+            ) : (
+              <div className="card-grid">
+                {appointments.map(rdv => (
+                  <div className="card" key={rdv.id}>
+                    <div className="card-header">
+                      <strong>{rdv.patientName}, {rdv.age}, {rdv.gender}</strong>
+                      <span className="badge green">Carnet</span>
+                    </div>
+                    <p>Notes : {rdv.notes}</p>
+                    <p>Heure : {rdv.time}</p>
+                    <div className="card-actions">
+                      <button className="btn green" onClick={() => handleJoinAppointment(rdv.id)}>Aller</button>
+                      <button className="btn pink">Reprogrammer</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </section>
-      )}
+      </div>
     </div>
   );
 }
