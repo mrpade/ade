@@ -1,7 +1,8 @@
 import axios from 'axios';
 
+const base = import.meta.env.VITE_API_URL || '';
 const icdApi = axios.create({
-  baseURL: import.meta.env.VITE_API_URL + '/icd'
+  baseURL: `${base}/api/icd`
 });
 
 export default icdApi;
