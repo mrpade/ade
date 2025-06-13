@@ -1,6 +1,6 @@
 # ADE – Application de Diagnostic de Maladies
 
-**ADE** (Analyse des Symptômes & Diagnostic Éclair) est une application full-stack (Backend Node.js + Frontend React) qui permet à un utilisateur adulte de saisir des symptômes et de recevoir un classement des maladies correspondantes, ainsi que d’accéder à son espace personnel.
+**ADE** (Analyse de Diagnostic Évolutif) est une application full-stack (Backend Node.js + Frontend React) qui permet à un utilisateur adulte de saisir des symptômes et de recevoir un classement des maladies correspondantes, ainsi que d’accéder à son espace personnel.
 
 ## 🚀 Prérequis
 
