@@ -18,7 +18,8 @@ router.get('/me', auth, async (req, res) => {
 });
 
 // PUT /doctors/me/availability  { is_available: true|false }
-router.put('/doctors/me/availability', auth, async (req, res) => {
+// Mounted at /api/doctors so the final path is /api/doctors/me/availability
+router.put('/me/availability', auth, async (req, res) => {
   try {
     const { is_available } = req.body;
     await Doctor.update({ is_available }, { where: { user_id: req.user.id } });
