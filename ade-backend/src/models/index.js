@@ -45,6 +45,14 @@ db.Courier     = require('./Courier')(sequelize, DataTypes);
 db.Patient     = require('./patient')(sequelize, DataTypes);
 db.Diagnosis   = require('./Diagnosis')(sequelize, DataTypes);
 db.DiseasesList = require('./DiseasesList')(sequelize, DataTypes);
+db.Consultation = require('./Consultation')(sequelize, DataTypes);
+db.Prescription = require('./Prescription')(sequelize, DataTypes);
+db.Product      = require('./Product')(sequelize, DataTypes);
+db.PharmacyStock = require('./PharmacyStock')(sequelize, DataTypes);
+db.Order        = require('./Order')(sequelize, DataTypes);
+db.OrderItem    = require('./OrderItem')(sequelize, DataTypes);
+db.Delivery     = require('./Delivery')(sequelize, DataTypes);
+db.Check        = require('./Check')(sequelize, DataTypes);
 
  // Mise en place des associations, si définies dans chaque modèle
  Object.keys(db).forEach(name => {
