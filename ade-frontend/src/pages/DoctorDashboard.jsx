@@ -11,8 +11,8 @@ export default function DoctorDashboard() {
   const [form, setForm] = useState({ speciality: '', onmc: '', workplace: '', bio: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [checks, setChecks] = useState([]);
-  const [appointments, setAppointments] = useState([]);
+  const [checks] = useState([]);
+  const [appointments] = useState([]);
 
   useEffect(() => {
     if (!token) return;
@@ -68,14 +68,15 @@ export default function DoctorDashboard() {
   };
 
   const handleToggleAvailability = async () => {
-      try {
-        const newFlag = !doctor.is_available;
-        await toggleAvailability(newFlag);
-        setDoctor(d => ({ ...d, is_available: newFlag }));
-      } catch (err) {
-        console.error('toggle availability error', err);
-      }
-    };
+    if (!doctor) return;
+    const newStatus = !doctor.is_available;
+    try {
+      await toggleAvailability(newStatus);
+      setDoctor(d => ({ ...d, is_available: newStatus }));
+    } catch (err) {
+      console.error('toggle availability error', err);
+    }
+  };
 
   if (!token) return <p>Veuillez vous connecter.</p>;
 
@@ -103,11 +104,13 @@ export default function DoctorDashboard() {
           </div>
           <h2 id='profile-name'>
             {user ? `${user.first_name} ${user.last_name}` : ''}
-            <span className={`status-dot ${doctor.is_available ? 'green' : 'red'}`}></span>
-            </h2>
+            <span
+              className={`status-indicator ${doctor.is_available ? 'green' : 'red'}`}
+            />
+          </h2>
           <p><i>ONMC No. {doctor.onmc}</i></p>
-          <button className="btn-availability" onClick={handleToggleAvailability}>
-            {doctor.is_available ? 'Me rendre indisponible' : 'Me rendre disponible'}
+          <button className="btn toggle" onClick={handleToggleAvailability}>
+            {doctor.is_available ? 'Se mettre hors ligne' : 'Se rendre disponible'}
           </button>
           <button id="btn-edit">Éditer mon profil</button>
           <ul className="sidebar-menu">
