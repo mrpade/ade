@@ -193,6 +193,13 @@ button{
   margin-bottom: 0.25rem;
 }
 
+/* Layout des cartes de résultats */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
 /*page inscription*/
 /* Conteneur en 2 colonnes */
 .register-page {

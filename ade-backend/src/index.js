@@ -53,8 +53,9 @@ app.use('/api/users', userRouter);
     await sequelize.authenticate();
     console.log('✅ Connexion à la BDD réussie');
 
-    // 9.2 Synchroniser les modèles (alter : true met à jour la structure sans perdre de données)
-    await sequelize.sync({ alter: true });
+    // 9.2 Synchroniser les modèles
+    // Utiliser les migrations pour modifier la structure afin d'éviter la multiplication des index
+    await sequelize.sync();
     console.log('✅ Modèles synchronisés');
 
     // 9.3 Démarrer le serveur

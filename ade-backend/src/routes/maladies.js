@@ -5,6 +5,33 @@ const { Op } = require('sequelize');
 const router = express.Router();
 const { DiseasesList } = require('../models');
 
+function levenshtein(a, b) {
+  const m = a.length;
+  const n = b.length;
+  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      dp[i][j] = Math.min(
+        dp[i - 1][j] + 1,
+        dp[i][j - 1] + 1,
+        dp[i - 1][j - 1] + cost
+      );
+    }
+  }
+  return dp[m][n];
+}
+
+function similarity(a, b) {
+  if (!a && !b) return 1;
+  if (!a || !b) return 0;
+  const distance = levenshtein(a.toLowerCase(), b.toLowerCase());
+  const maxLen = Math.max(a.length, b.length);
+  return maxLen === 0 ? 1 : 1 - distance / maxLen;
+}
+
 router.get('/', async (req, res) => {
   try {
     const { symptomes } = req.query;
@@ -30,29 +57,48 @@ router.get('/', async (req, res) => {
       }
     });
 
-    // calculer le nombre de correspondances pour chaque maladie
-    const withCounts = candidates.map(item => {
-      const text = (item.Symptomes || '').toLowerCase();
-      const count = terms.reduce(
-        (acc, t) => acc + (text.includes(t) ? 1 : 0),
+    const scored = candidates.map(item => {
+      const itemSyms = (item.Symptomes || '')
+        .toLowerCase()
+        .split(/[,;]+/)
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      const matchCount = terms.reduce(
+        (acc, t) => acc + (itemSyms.includes(t) ? 1 : 0),
         0
       );
-      return { item, count };
+
+      const diffScore = 1 - Math.min(
+        Math.abs(itemSyms.length - terms.length) /
+          Math.max(itemSyms.length, terms.length),
+        1
+      );
+
+      const spellTotal = terms.reduce((acc, term) => {
+        const best = itemSyms.reduce(
+          (max, sym) => Math.max(max, similarity(term, sym)),
+          0
+        );
+        return acc + best;
+      }, 0);
+      const spellScore = terms.length ? spellTotal / terms.length : 0;
+
+      const countScore = terms.length
+        ? (matchCount / terms.length) * diffScore
+        : 0;
+
+      const finalScore = (0.7 * countScore + 0.3 * spellScore) * 5;
+
+      return { item, score: finalScore };
     });
 
-    // trier :
-    // 1) ceux qui matchent tous les termes
-    // 2) les autres par nombre de correspondances décroissant
-    withCounts.sort((a, b) => {
-      const allA = a.count === terms.length;
-      const allB = b.count === terms.length;
-      if (allA && !allB) return -1;
-      if (allB && !allA) return 1;
-      return b.count - a.count;
-    });
+    scored.sort((a, b) => b.score - a.score);
 
-    // ne garder que les 5 premiers
-    const top5 = withCounts.slice(0, 5).map(entry => entry.item);
+    const top5 = scored.slice(0, 5).map(({ item, score }) => ({
+      ...item.toJSON(),
+      score: Number(score.toFixed(2))
+    }));
 
     res.json(top5);
 
