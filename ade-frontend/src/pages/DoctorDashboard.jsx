@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
-import { createDoctorProfile } from '../api/doctors';
+import { createDoctorProfile, toggleAvailability } from '../api/doctors';
 import './DoctorDashboard.css';
 
 export default function DoctorDashboard() {
@@ -67,6 +67,16 @@ export default function DoctorDashboard() {
     console.log('join appointment', id);
   };
 
+  const handleToggleAvailability = async () => {
+      try {
+        const newFlag = !doctor.is_available;
+        await toggleAvailability(newFlag);
+        setDoctor(d => ({ ...d, is_available: newFlag }));
+      } catch (err) {
+        console.error('toggle availability error', err);
+      }
+    };
+
   if (!token) return <p>Veuillez vous connecter.</p>;
 
   if (!doctor) {
@@ -91,8 +101,14 @@ export default function DoctorDashboard() {
           <div className="profile-pic">
             <img src="" alt="profile picture" />
           </div>
-          <h2 id='profile-name'>{user ? `${user.first_name} ${user.last_name}` : ''}</h2>
+          <h2 id='profile-name'>
+            {user ? `${user.first_name} ${user.last_name}` : ''}
+            <span className={`status-dot ${doctor.is_available ? 'green' : 'red'}`}></span>
+            </h2>
           <p><i>ONMC No. {doctor.onmc}</i></p>
+          <button className="btn-availability" onClick={handleToggleAvailability}>
+            {doctor.is_available ? 'Me rendre indisponible' : 'Me rendre disponible'}
+          </button>
           <button id="btn-edit">Éditer mon profil</button>
           <ul className="sidebar-menu">
             <li>Mes revenus</li>
