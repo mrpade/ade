@@ -8,6 +8,10 @@ export default defineConfig({
   },
   // facultatif, pour désactiver temporairement l’overlay d’erreur :
   server: {
-    hmr: { overlay: false }
+    hmr: { overlay: false },
+    // Proxy API calls during development
+    proxy: {
+      '/api': 'http://localhost:4000'
+    }
   }
 })

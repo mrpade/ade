@@ -42,7 +42,7 @@ cp .env.example .env
 # Lance le serveur (port 4000 par défaut)
 npm run dev
 
-L’API tourne sur http://localhost:4000/api.
+L’API tourne sur http://localhost:4000.
 
 3. Frontend
 cd ../ade-frontend

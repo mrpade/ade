@@ -141,29 +141,35 @@ export default function Maladies() {
       {results.length === 0 ? (
         <p>Aucun résultat.</p>
       ) : (
-        results.map((m, i) => (
-          <div key={i} className="card">
-            <h2>{m.Nom}</h2>
-            <p><strong>Symptômes :</strong> {m.Symptomes}</p>
-            <p><strong>Causes :</strong> {m.Causes}</p>
-            <p><strong>Transmission :</strong> {m.Transmission}</p>
-            <p><strong>Traitements :</strong> {m.Traitements}</p>
-          </div>
-        ))
+        <div className="card-grid">
+          {results.map((m, i) => (
+            <div key={i} className="card">
+              <h2>{m.Nom}</h2>
+              <p><strong>Symptômes :</strong> {m.Symptomes}</p>
+              <p><strong>Causes :</strong> {m.Causes}</p>
+              <p><strong>Transmission :</strong> {m.Transmission}</p>
+              <p><strong>Traitements :</strong> {m.Traitements}</p>
+              {m.score !== undefined && (
+                <p><strong>Score :</strong> {m.score}/5</p>
+              )}
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
 }
 
- /*return (
-    <div>
-      <h1>Recherche de maladies</h1>
-      <SymptomSearch onSearch={handleSearch} />
-      <ul>
-        {results.map((m, idx) => (
-          <li key={m.id ?? idx}>{m.Nom} - Symptômes: {m.Symptomes}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}*/
+/*
+return (
+  <div>
+    <h1>Recherche de maladies</h1>
+    <SymptomSearch onSearch={handleSearch} />
+    <ul>
+      {results.map((m, idx) => (
+        <li key={m.id ?? idx}>{m.Nom} - Symptômes: {m.Symptomes}</li>
+      ))}
+    </ul>
+  </div>
+);
+*/

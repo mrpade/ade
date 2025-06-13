@@ -2,8 +2,10 @@
 import axios from 'axios';
 
 // Crée une instance Axios avec l’URL de base de ton API
+const base = import.meta.env.VITE_API_URL || '';
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
+  // Use relative /api by default so dev server proxy can handle requests
+  baseURL: `${base}/api`
 });
 
 // Interceptor pour ajouter automatiquement le token JWT à chaque requête
