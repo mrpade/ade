@@ -1,7 +1,7 @@
 // src/services/cleanup.js
 const cron = require('node-cron');
 const { Op } = require('sequelize');
-const User   = require('../models');
+const { User }   = require('../models');
 
 // Planification : chaque jour à 3h du matin
 cron.schedule('0 3 * * *', async () => {
