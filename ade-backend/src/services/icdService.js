@@ -20,3 +20,4 @@ async function searchSymptoms(term) {
       }))
     : [];
 }
+module.exports = { searchSymptoms };
