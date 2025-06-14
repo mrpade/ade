@@ -1,7 +1,11 @@
 // src/pages/Maladies.jsx
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import debounce from 'lodash.debounce';
 import api from '../services/api';
+import { getAvailableDoctors } from '../api/doctors';
+import { createCheck } from '../api/checks';
+import { AuthContext } from '../context/AuthContext';
 /*import SymptomSearch from '../components/SymptomSearch';*/
 
 export default function Maladies() {
@@ -10,6 +14,12 @@ export default function Maladies() {
   const [suggestions, setSuggestions]   = useState([]);
   const [showSug, setShowSug]           = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [doctors, setDoctors]           = useState([]);
+  const [selecting, setSelecting]       = useState(null);
+  const [selectedDoctor, setSelectedDoctor] = useState('');
+
+  const navigate = useNavigate();
+  const { token } = useContext(AuthContext);
 
 
 
@@ -95,6 +105,35 @@ export default function Maladies() {
     }
   };
 
+  const handleCheckClick = async disease => {
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    try {
+      const { data } = await getAvailableDoctors();
+      setDoctors(data);
+      setSelecting(disease);
+      setSelectedDoctor('');
+    } catch (err) {
+      console.error('fetch doctors failed', err);
+    }
+  };
+
+  const handleSubmitCheck = async () => {
+    if (!selectedDoctor || !selecting) return;
+    try {
+      const symptoms = query
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean);
+      await createCheck(selecting.id, symptoms, selectedDoctor);
+      setSelecting(null);
+    } catch (err) {
+      console.error('create check error', err);
+    }
+  };
+
   return (
     <div className="container">
       <h1>Recherche de maladies</h1>
@@ -140,6 +179,27 @@ export default function Maladies() {
               <p><strong>Traitements :</strong> {m.Traitements}</p>
               {m.score !== undefined && (
                 <p><strong>Score :</strong> {m.score}</p>
+              )}
+              {i === 0 && (
+                <>
+                  <button onClick={() => handleCheckClick(m)}>Check</button>
+                  {selecting && selecting.id === m.id && (
+                    <div className="doctor-select">
+                      <select
+                        value={selectedDoctor}
+                        onChange={e => setSelectedDoctor(e.target.value)}
+                      >
+                        <option value="">Choisissez un médecin</option>
+                        {doctors.map(doc => (
+                          <option key={doc.user_id} value={doc.user_id}>
+                            {doc.account?.first_name} {doc.account?.last_name}
+                          </option>
+                        ))}
+                      </select>
+                      <button onClick={handleSubmitCheck}>Envoyer</button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           ))}

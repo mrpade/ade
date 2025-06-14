@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Doctor }  = require('../models');
+const { Doctor, User }  = require('../models');
 const auth        = require('../middleware/auth');
 
 // GET /doctors/me
@@ -14,6 +14,19 @@ router.get('/me', auth, async (req, res) => {
     res.json(doctor);
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /doctors/available – liste des médecins connectés disponibles
+router.get('/available', async (req, res) => {
+  try {
+    const list = await Doctor.findAll({
+      where: { is_available: true },
+      include: [{ model: User, as: 'account', attributes: ['first_name', 'last_name'] }]
+    });
+    res.json(list);
+  } catch (err) {
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
