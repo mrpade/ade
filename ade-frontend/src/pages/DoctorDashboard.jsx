@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
 import { createDoctorProfile, toggleAvailability } from '../api/doctors';
+import { getDoctorChecks } from '../api/checks';
 import './DoctorDashboard.css';
 
 export default function DoctorDashboard() {
@@ -11,8 +12,14 @@ export default function DoctorDashboard() {
   const [form, setForm] = useState({ speciality: '', onmc: '', workplace: '', bio: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [checks] = useState([]);
+  const [checks, setChecks] = useState([]);
   const [appointments] = useState([]);
+
+  const calcAge = dateStr => {
+    if (!dateStr) return '';
+    const diff = Date.now() - new Date(dateStr).getTime();
+    return Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+  };
 
   useEffect(() => {
     if (!token) return;
@@ -29,6 +36,18 @@ export default function DoctorDashboard() {
       try {
         const { data } = await api.get('/doctors/me');
         setDoctor(data);
+        const checksRes = await getDoctorChecks();
+        const mapped = checksRes.data.map(c => ({
+          id: c.id,
+          patientName: `${c.Diagnosis.patient.first_name} ${c.Diagnosis.patient.last_name}`,
+          age: calcAge(c.Diagnosis.patient.birthdate),
+          symptoms: Array.isArray(c.Diagnosis.symptoms_json)
+            ? c.Diagnosis.symptoms_json.join(', ')
+            : (c.Diagnosis.symptoms_json ? JSON.parse(c.Diagnosis.symptoms_json).join(', ') : ''),
+          diagnosis: c.Diagnosis.disease?.Nom,
+          patientId: c.Diagnosis.patient_id
+        }));
+        setChecks(mapped);
       } catch (err) {
         if (err.response?.status === 404) {
           setDoctor(null);
