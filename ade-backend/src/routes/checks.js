@@ -4,10 +4,21 @@ const auth = require('../middleware/auth');
 
 router.post('/', auth, async (req, res) => {
   try {
-    const { disease_id, symptoms = [], doctor_user_id } = req.body;
+    const {
+      disease_id: rawDisease,
+      symptoms = [],
+      doctor_user_id: rawDoctor
+    } = req.body;
+
+    const disease_id = parseInt(rawDisease, 10);
+    const doctor_user_id = parseInt(rawDoctor, 10);
+
     if (!disease_id || !doctor_user_id) {
-      return res.status(400).json({ error: 'disease_id et doctor_user_id requis' });
+      return res
+        .status(400)
+        .json({ error: 'disease_id et doctor_user_id requis' });
     }
+
     const diagnosis = await Diagnosis.create({
       patient_id: req.user.id,
       disease_id,
