@@ -127,7 +127,7 @@ export default function Maladies() {
         .split(',')
         .map(s => s.trim())
         .filter(Boolean);
-      await createCheck(selecting.id, symptoms, Number(selectedDoctor));
+      await createCheck(selecting.id, symptoms, selectedDoctor);
       setSelecting(null);
     } catch (err) {
       console.error('create check error', err);
