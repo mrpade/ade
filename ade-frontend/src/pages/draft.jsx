@@ -11,8 +11,8 @@ export default function DoctorDashboard() {
   const [form, setForm] = useState({ speciality: '', onmc: '', workplace: '', bio: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [checks, setChecks] = useState([]);
-  const [appointments, setAppointments] = useState([]);
+  const [checks] = useState([]);
+  const [appointments] = useState([]);
 
   useEffect(() => {
     if (!token) return;
