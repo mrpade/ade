@@ -21,6 +21,7 @@ const doctorRouter = require('./routes/doctors');      // route GET /api/symptom
 const monCompteRouter  = require('./routes/moncompte')
 const userRouter = require('./routes/user'); // route GET /api/users
 const checksRouter = require('./routes/checks');
+const patientRouter = require('./routes/patient');
 
 
 // 5. App Express
@@ -47,6 +48,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/doctors', doctorRouter); // route GET /api/doctors
 app.use('/api/users', userRouter);
 app.use('/api/checks', checksRouter);
+app.use('/api', patientRouter);
 
 // 9. Connexion à la BDD, synchronisation des modèles, puis démarrage du serveur
 (async () => {
