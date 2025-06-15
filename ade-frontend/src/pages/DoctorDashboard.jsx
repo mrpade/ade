@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
 import { createDoctorProfile, toggleAvailability } from '../api/doctors';
-import { getDoctorChecks } from '../api/checks';
+import { getDoctorChecks, updateCheckAnswer } from '../api/checks';
 import './DoctorDashboard.css';
 
 export default function DoctorDashboard() {
@@ -14,6 +14,8 @@ export default function DoctorDashboard() {
   const [error, setError] = useState('');
   const [checks, setChecks] = useState([]);
   const [appointments] = useState([]);
+  const [answerId, setAnswerId] = useState(null);
+  const [answerText, setAnswerText] = useState('');
 
   const calcAge = dateStr => {
     if (!dateStr) return '';
@@ -77,10 +79,28 @@ export default function DoctorDashboard() {
   };
 
   const handleValidate = id => {
-    console.log('validate check', id);
+    setAnswerId(id);
+    setAnswerText('');
   };
-  const handleStartConsult = pid => {
-    console.log('start consult', pid);
+
+  const handleSubmitAnswer = async e => {
+    e.preventDefault();
+    if (!answerId) return;
+    try {
+      await updateCheckAnswer(answerId, answerText);
+      setChecks(cs => cs.filter(c => c.id !== answerId));
+    } catch (err) {
+      console.error('submit answer error', err);
+    } finally {
+      setAnswerId(null);
+      setAnswerText('');
+    }
+  };
+
+  const handleStartConsult = id => {
+    updateCheckAnswer(id, 'Please make an appointment')
+      .then(() => setChecks(cs => cs.filter(c => c.id !== id)))
+      .catch(err => console.error('consult request error', err));
   };
   const handleJoinAppointment = id => {
     console.log('join appointment', id);
@@ -157,10 +177,22 @@ export default function DoctorDashboard() {
                     <p>Symptômes : {check.symptoms}</p>
                     <p>Résultat : {check.diagnosis}</p>
                     <p>Notes : {check.notes}</p>
-                    <div className="card-actions">
-                      <button className="btn green" onClick={() => handleValidate(check.id)}>Valider</button>
-                      <button className="btn pink" onClick={() => handleStartConsult(check.patientId)}>Consultation/Diagnostic</button>
-                    </div>
+                    {answerId === check.id ? (
+                      <form onSubmit={handleSubmitAnswer} className="answer-form">
+                        <input
+                          value={answerText}
+                          onChange={e => setAnswerText(e.target.value)}
+                          placeholder="Votre réponse"
+                          required
+                        />
+                        <button type="submit" className="btn green">Submit</button>
+                      </form>
+                    ) : (
+                      <div className="card-actions">
+                        <button className="btn green" onClick={() => handleValidate(check.id)}>Valider</button>
+                        <button className="btn pink" onClick={() => handleStartConsult(check.id)}>Consultation/Diagnostic</button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -188,7 +220,7 @@ export default function DoctorDashboard() {
                   </div>
                 ))}
               </div>
-            )}
+              )}
           </div>
         </section>
     </div>
