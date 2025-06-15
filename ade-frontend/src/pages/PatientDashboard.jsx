@@ -59,8 +59,18 @@ export default function PatientDashboard() {
                   <p><strong>Résultat :</strong> {check.result}</p>
                   <p><strong>Réponse du médecin :</strong> {check.notes}</p>
                   <div className="card-actions">
-                    <button className="btn green" onClick={() => window.location = `/pharmacy/${check.id}`}>Pharmacie</button>
-                    <button className="btn pink" onClick={() => window.location = `/consult/${check.id}`}>Consultation/Diagnostic</button>
+                    {check.notes ? (
+                      check.notes === 'Please make an appointment' ? (
+                        <button className="btn pink" onClick={() => window.location = `/consult/${check.id}`}>Consultation/Diagnostic</button>
+                      ) : (
+                        <button className="btn green" onClick={() => window.location = `/pharmacy/${check.id}`}>Pharmacie</button>
+                      )
+                    ) : (
+                      <>
+                        <button className="btn green" onClick={() => window.location = `/pharmacy/${check.id}`}>Pharmacie</button>
+                        <button className="btn pink" onClick={() => window.location = `/consult/${check.id}`}>Consultation/Diagnostic</button>
+                      </>
+                    )}
                   </div>
                 </div>
               ))}
