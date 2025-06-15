@@ -39,7 +39,9 @@ export default function DoctorDashboard() {
         const { data } = await api.get('/doctors/me');
         setDoctor(data);
         const checksRes = await getDoctorChecks();
-        const mapped = checksRes.data.map(c => ({
+        const mapped = checksRes.data
+          .filter(c => !c.answer)
+          .map(c => ({
           id: c.id,
           patientName: `${c.Diagnosis.patient.first_name} ${c.Diagnosis.patient.last_name}`,
           age: calcAge(c.Diagnosis.patient.birthdate),
