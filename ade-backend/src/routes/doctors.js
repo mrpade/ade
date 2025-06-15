@@ -60,7 +60,10 @@ router.post('/', auth, async (req, res) => {
 router.get('/me/checks', auth, async (req, res) => {
   try {
     const checks = await Check.findAll({
-      where: { doctor_user_id: req.user.id },
+      where: {
+        doctor_user_id: req.user.id,
+        answer: null
+      },
       include: [{
         model: Diagnosis,
         include: [
