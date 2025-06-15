@@ -6,7 +6,7 @@ const auth       = require('../middleware/auth');
 router.post('/diagnoses', auth, async (req, res) => {
   try {
     const { disease_id, symptoms } = req.body; // symptoms = array of strings
-    const diag = await Diagnosis.create({
+      const diag = await Diagnosis.create({
         patient_id: req.user.id,
       disease_id,
       symptoms_json: JSON.stringify(symptoms),

@@ -6,8 +6,8 @@ const auth     = require('../middleware/auth');
 router.post('/couriers', auth, async (req, res) => {
   try {
     const { vehicle_type, plate_number, driver_license } = req.body;
-    const courier = await Courier.create({
-      user_id: req.user.id,
+      const courier = await Courier.create({
+        user_id: req.user.id,
       vehicle_type,
       plate_number,
       driver_license,
@@ -21,7 +21,7 @@ router.post('/couriers', auth, async (req, res) => {
 router.put('/couriers/me/availability', auth, async (req, res) => {
   try {
     const { is_available } = req.body;
-    await Courier.update({ is_available }, { where: { user_id: req.user.id } });
+      await Courier.update({ is_available }, { where: { user_id: req.user.id } });
     res.json({ message: 'Disponibilité mise à jour' });
   } catch (e) { res.status(500).json({ error: 'Erreur serveur' }); }
 });

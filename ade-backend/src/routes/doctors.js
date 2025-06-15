@@ -56,6 +56,7 @@ router.post('/', auth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: 'Erreur serveur' }); }
 });
 
+// GET /doctors/me/checks – all pending checks assigned to the logged in doctor
 router.get('/me/checks', auth, async (req, res) => {
   try {
     const checks = await Check.findAll({

@@ -22,8 +22,8 @@ router.post('/pharmacies', auth, async (req, res) => {
       const geo = await geocodeAddress(address);
       lat = geo.lat; lon = geo.lon;
     }
-    const pharmacy = await Pharmacy.create({
-      user_id: req.user.id,
+      const pharmacy = await Pharmacy.create({
+        user_id: req.user.id,
       name,
       address,
       latitude: lat,
