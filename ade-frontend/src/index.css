@@ -64,6 +64,11 @@ button{
   cursor: pointer;
   transition: background-color .5s ease;
 }
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
 .spinner {
   display: inline-block;
   width: 24px;
