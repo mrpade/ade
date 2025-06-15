@@ -1,24 +1,28 @@
 // src/pages/MonCompte.jsx
-import { useState, useEffect, } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { AuthContext } from '../context/AuthContext';
 
 export default function MonCompte() {
+  const { token, logout } = useContext(AuthContext);
   const [user, setUser]   = useState(null);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!token) return;
     api.get('/moncompte')
       .then(({ data }) => setUser(data))
       .catch(err => {
         console.error(err);
+        if (err.response?.status === 401) logout();
         setError('Impossible de charger vos informations.');
       });
-  }, []);
+  }, [token, logout]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    logout();
     navigate('/login');
   };
 
