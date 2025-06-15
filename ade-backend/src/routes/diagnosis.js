@@ -7,7 +7,7 @@ router.post('/diagnoses', auth, async (req, res) => {
   try {
     const { disease_id, symptoms } = req.body; // symptoms = array of strings
     const diag = await Diagnosis.create({
-      patient_id: req.user.userId,
+        patient_id: req.user.id,
       disease_id,
       symptoms_json: JSON.stringify(symptoms),
       status: 'pending'
@@ -18,7 +18,7 @@ router.post('/diagnoses', auth, async (req, res) => {
 
 // GET /diagnoses/me – diagnostics du patient connecté
 router.get('/diagnoses/me', auth, async (req, res) => {
-  const list = await Diagnosis.findAll({ where: { patient_id: req.user.userId }, order: [['created_at','DESC']] });
+  const list = await Diagnosis.findAll({ where: { patient_id: req.user.id }, order: [['created_at','DESC']] });
   res.json(list);
 });
 

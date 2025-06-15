@@ -23,7 +23,7 @@ router.post('/pharmacies', auth, async (req, res) => {
       lat = geo.lat; lon = geo.lon;
     }
     const pharmacy = await Pharmacy.create({
-      user_id: req.user.userId,
+      user_id: req.user.id,
       name,
       address,
       latitude: lat,
@@ -39,7 +39,7 @@ router.post('/pharmacies', auth, async (req, res) => {
 router.put('/pharmacies/me/oncall', auth, async (req, res) => {
   try {
     const { is_on_call } = req.body;
-    await Pharmacy.update({ is_on_call }, { where: { user_id: req.user.userId } });
+      await Pharmacy.update({ is_on_call }, { where: { user_id: req.user.id } });
     res.json({ message: 'État de garde mis à jour' });
   } catch (e) { res.status(500).json({ error: 'Erreur serveur' }); }
 });

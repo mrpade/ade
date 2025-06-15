@@ -6,7 +6,7 @@ router.put('/patients/me', auth, async (req, res) => {
   const { height_cm, weight_kg, medical_history, emergency_contact } = req.body;
   try {
     await Patient.upsert({
-      user_id: req.user.userId,
+      user_id: req.user.id,
       height_cm,
       weight_kg,
       medical_history,

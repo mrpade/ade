@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Doctor }  = require('../models');
+const { Doctor, User, Check, Diagnosis, DiseasesList }  = require('../models');
 const auth        = require('../middleware/auth');
 
 // GET /doctors/me
@@ -14,6 +14,19 @@ router.get('/me', auth, async (req, res) => {
     res.json(doctor);
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /doctors/available – liste des médecins connectés disponibles
+router.get('/available', async (req, res) => {
+  try {
+    const list = await Doctor.findAll({
+      where: { is_available: true },
+      include: [{ model: User, as: 'account', attributes: ['first_name', 'last_name'] }]
+    });
+    res.json(list);
+  } catch (err) {
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -41,6 +54,26 @@ router.post('/', auth, async (req, res) => {
     });
     res.status(201).json(doctor);
   } catch (e) { res.status(500).json({ error: 'Erreur serveur' }); }
+});
+
+router.get('/me/checks', auth, async (req, res) => {
+  try {
+    const checks = await Check.findAll({
+      where: { doctor_user_id: req.user.id },
+      include: [{
+        model: Diagnosis,
+        include: [
+          { model: User, as: 'patient', attributes: ['first_name', 'last_name', 'birthdate'] },
+          { model: DiseasesList, as: 'disease', attributes: ['Nom'] }
+        ]
+      }],
+      order: [['created_at', 'DESC']]
+    });
+    res.json(checks);
+  } catch (err) {
+    console.error('fetch doctor checks error', err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
 });
 
 module.exports = router;
