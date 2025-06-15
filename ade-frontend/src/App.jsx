@@ -12,6 +12,7 @@ import ResetPassword   from './pages/ResetPassword.jsx';
 import MonCompte from './pages/MonCompte';
 import Profile         from './pages/Profile.jsx';
 import DoctorDashboard from './pages/DoctorDashboard.jsx';
+import PatientDashboard from './pages/PatientDashboard.jsx';
 import './index.css';
 
 export default function App() {
@@ -32,6 +33,7 @@ export default function App() {
           <Route path="/moncompte" element={<MonCompte />} />
           <Route path="/doctor"    element={<DoctorDashboard />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/patient" element={<PatientDashboard />} />
 
           {/* Catch-all pour URL inconnues */}
           <Route
