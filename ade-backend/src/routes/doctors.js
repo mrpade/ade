@@ -59,7 +59,7 @@ router.post('/', auth, async (req, res) => {
 // GET /doctors/me/checks – all pending checks assigned to the logged in doctor
 router.get('/me/checks', auth, async (req, res) => {
   try {
-     const checks = await Check.findAll({
+    const checks = await Check.findAll({
       where: {
         doctor_user_id: req.user.id,
         answer: null
