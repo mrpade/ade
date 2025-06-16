@@ -60,8 +60,8 @@
   border-radius: 50%;
 }
 
-.status-indicator.green { background-color: #007f5f; }
-.status-indicator.red { background-color: #d8125a; }
+.status-indicator.green { background-color: var(--primary-color); }
+.status-indicator.red { background-color: var(--accent-color); }
 
 .btn.toggle {
   margin-top: 10px;
@@ -72,9 +72,9 @@
 }
 
 #btn-edit:hover{
-    background-color: #d8125a;
+    background-color: var(--accent-color);
 }
-.btn-logout { background-color: #d8125a; color: white; }
+.btn-logout { background-color: var(--accent-color); color: white; }
 
 .sidebar-menu {
   list-style: none;
@@ -89,11 +89,11 @@
     border-bottom: 1px solid black;
     cursor: pointer;
     color: #333;
-    transition: scale .3s ease-in-out;
+    transition: transform .3s ease-in-out;
   }
 }
 .sidebar-menu li:hover {
-  scale: 1.1;
+  transform: scale(1.1);
 }
 
 .dashboard-content {
@@ -118,7 +118,7 @@
   padding: 15px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0,0,0,0.05);
-  width: fit-content;
+  width: fit-content !important;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -138,7 +138,7 @@
   color: white;
 }
 
-.badge.green { background-color: #007f5f; }
+.badge.green { background-color: var(--primary-color); }
 
 .card-actions {
   display: flex;

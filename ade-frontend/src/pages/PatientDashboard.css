@@ -82,7 +82,7 @@
 }
 
 .btn-logout {
-  background: #e91e63;
+  background: var(--accent-color);
   color: white;
 }
 
@@ -146,7 +146,7 @@
 }
 
 .badge.green {
-  background-color: #007f5f;
+  background-color: var(--primary-color);
 }
 
 .card-actions {
@@ -166,7 +166,7 @@
 }
 
 .btn.green {
-  background-color: #007f5f;
+  background-color: var(--primary-color);
   margin-right: 10px;
 }
 

@@ -36,4 +36,24 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
+// PUT /checks/:id - update doctor's answer on a check
+router.put('/:id', auth, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { answer } = req.body;
+    if (!id || !answer) {
+      return res.status(400).json({ error: 'id et answer requis' });
+    }
+    const [updated] = await Check.update(
+      { answer },
+      { where: { id, doctor_user_id: req.user.id } }
+    );
+    if (!updated) return res.status(404).json({ error: 'Check non trouvé' });
+    res.json({ message: 'Réponse enregistrée' });
+  } catch (err) {
+    console.error('update check error', err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 module.exports = router;

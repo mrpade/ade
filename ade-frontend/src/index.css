@@ -5,6 +5,7 @@
   --primary-color: #166635;
   --secondary-color: #fff;
   --tertiary-color: #121310;
+  --accent-color: #d8125a;
   font-family: "Poppins", Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -64,6 +65,11 @@ button{
   cursor: pointer;
   transition: background-color .5s ease;
 }
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
 .spinner {
   display: inline-block;
   width: 24px;
@@ -75,62 +81,6 @@ button{
 }
 @keyframes spin {
   to { transform: rotate(360deg); }
-}
-
-/* Navbar */
-.navbar {
-  width: 80%;
-  border-radius: 10px;
-  margin: 10px auto;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  padding: 20px 40px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-}
-.navbar__logo img {
-  height: 25px;          /* ajuste à la hauteur désirée */
-  width: auto;
-}
-.navbar__links {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-/* Style des liens */
-.navbar__link {
-  color: var(--tertiary-color);
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.navbar__link:hover {
-  color: #0a7f3b;
-}
-
-/* Lien actif */
-.navbar__link.active {
-  color: var(--primary-color);
-  font-weight: 700;
-}
-.navbar__link--button{
-  margin: auto;
-  padding: 0.75rem 1rem;
-  background-color: #0a7f3b;
-  color: #fff;
-  text-decoration: none;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color .5s ease;
-}
-.navbar__link--button:hover {
-  background-color: #d8125a;
 }
 
 /* Container pour les pages */
@@ -197,13 +147,6 @@ button{
 }
 .card p {
   margin-bottom: 0.25rem;
-}
-
-/* Layout des cartes de résultats */
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
 }
 
 /*page inscription*/
@@ -277,7 +220,7 @@ button{
 }
 
 .register-page__form button:hover {
-  background-color: #d8125a;
+  background-color: var(--accent-color);
 }
 
 .form-error {
@@ -314,3 +257,61 @@ button{
 }
 .error { color: #c00; }
 .info  { color: #080; }
+
+
+/*
+.navbar {
+  width: 80%;
+  border-radius: 10px;
+  margin: 10px auto;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  padding: 20px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+.navbar__logo img {
+  height: 25px;      
+  width: auto;
+}
+.navbar__links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+
+.navbar__link {
+  color: var(--tertiary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.navbar__link:hover {
+  color: #0a7f3b;
+}
+
+
+.navbar__link.active {
+  color: var(--primary-color);
+  font-weight: 700;
+}
+.navbar__link--button{
+  margin: auto;
+  padding: 0.75rem 1rem;
+  background-color: #0a7f3b;
+  color: #fff;
+  text-decoration: none;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color .5s ease;
+}
+.navbar__link--button:hover {
+  background-color: var(--accent-color);
+}
+*/

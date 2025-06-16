@@ -1,16 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
+import api from '../services/api';
 import './PatientDashboard.css';
 
 export default function PatientDashboard() {
+  const { token, logout } = useContext(AuthContext);
   const [profile, setProfile] = useState(null);
   const [checks, setChecks] = useState([]);
   const [appointments, setAppointments] = useState([]);
 
   useEffect(() => {
-    fetch('/api/patient/profile').then(res => res.json()).then(setProfile);
-    fetch('/api/patient/checks').then(res => res.json()).then(setChecks);
-    fetch('/api/patient/appointments').then(res => res.json()).then(setAppointments);
-  }, []);
+    if (!token) return;
+    const fetchData = async () => {
+      try {
+        const profileRes = await api.get('/patient/profile');
+        setProfile(profileRes.data);
+        const checksRes = await api.get('/patient/checks');
+        setChecks(checksRes.data);
+        const appRes = await api.get('/patient/appointments');
+        setAppointments(appRes.data);
+      } catch (err) {
+        console.error('patient dashboard fetch error', err);
+        if (err.response?.status === 401) logout();
+      }
+    };
+    fetchData();
+  }, [token, logout]);
 
   return (
     <div className="container" id='patient-dashboard-container'>
@@ -32,7 +47,7 @@ export default function PatientDashboard() {
           <div id='patient-dashboard-header'>Bienvenue, {profile?.firstName} {profile?.lastName}</div>
         <div className="content">
           <section>
-            <h2>Checks en attente de validation</h2>
+            <h2>Mes Checks</h2>
             <div className="grid">
               {checks.map(check => (
                 <div className="card" key={check.id}>
@@ -44,8 +59,13 @@ export default function PatientDashboard() {
                   <p><strong>Résultat :</strong> {check.result}</p>
                   <p><strong>Réponse du médecin :</strong> {check.notes}</p>
                   <div className="card-actions">
-                    <button className="btn green" onClick={() => window.location = `/pharmacy/${check.id}`}>Pharmacie</button>
-                    <button className="btn pink" onClick={() => window.location = `/consult/${check.id}`}>Consultation/Diagnostic</button>
+                    {check.notes && (
+                      check.notes === 'Veuillez prendre rdv' ? (
+                        <button className="btn pink" onClick={() => window.location = `/consult/${check.id}`}>Consultation/Diagnostic</button>
+                      ) : (
+                        <button className="btn green" onClick={() => window.location = `/pharmacy/${check.id}`}>Pharmacie</button>
+                      )
+                    )}
                   </div>
                 </div>
               ))}

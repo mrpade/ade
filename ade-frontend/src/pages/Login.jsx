@@ -31,7 +31,7 @@ export default function Login() {
       if (data.role === 'doctor')      navigate('/doctor');
         else if (data.role === 'pharmacy') navigate('/pharmacy');
         else if (data.role === 'courier')  navigate('/courier');
-        else                               navigate('/moncompte'); // patient par défaut       // <-- redirection vers la page Profil
+        else                               navigate('/patient'); // patient par défaut       // <-- redirection vers la page Profil
     } catch (err) {
       console.error('Erreur login:', err);
       setError(err.response?.data?.error || 'Erreur de connexion');
