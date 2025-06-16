@@ -1,5 +1,6 @@
 // src/context/AuthContext.jsx
 import { createContext, useState, useEffect } from 'react';
+import api from '../services/api';
 export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
@@ -14,12 +15,22 @@ export function AuthProvider({ children }) {
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
+  // 2.1 Met à jour l'en-tête Authorization de l'instance Axios
+  useEffect(() => {
+    if (token) {
+      api.defaults.headers.common.Authorization = `Bearer ${token}`;
+    } else {
+      delete api.defaults.headers.common.Authorization;
+    }
+  }, [token]);
+
   // 3. Fonction pour se connecter : on stocke en localStorage ET dans le state
   const login = (newToken, newRole) => {
     localStorage.setItem('token', newToken);
     localStorage.setItem('role', newRole);
     setToken(newToken);
     setRole(newRole);
+    api.defaults.headers.common.Authorization = `Bearer ${newToken}`;
   };
 
   // 4. Fonction pour se déconnecter : on supprime le token et on remet state à null
@@ -28,6 +39,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('role');
     setToken(null);
     setRole(null);
+    delete api.defaults.headers.common.Authorization;
   };
 
   // 5. On expose token, login et logout à tous les enfants du provider
