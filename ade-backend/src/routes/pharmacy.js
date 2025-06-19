@@ -51,27 +51,44 @@ router.get('/pharmacies/near', async (req, res) => {
     return res.status(400).json({ error: 'Coordonnées manquantes' });
   }
   try {
-    const url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json';
-    const { data } = await axios.get(url, {
-      params: {
-        location: `${lat},${lon}`,
-        radius: 5000,
-        type: 'pharmacy',
-        key: process.env.GOOGLE_MAPS_API_KEY
-      }
-    });
-    const list = Array.isArray(data.results) ? data.results.slice(0, 10) : [];
-    const pharmacies = list.map(p => ({
-      name: p.name,
-      address: p.vicinity,
-      latitude: p.geometry?.location?.lat,
-      longitude: p.geometry?.location?.lng,
-      location_verified: true,
-      is_on_call: false
-    }));
+    let pharmacies = [];
+    if (process.env.GOOGLE_MAPS_API_KEY) {
+      const url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json';
+      const { data } = await axios.get(url, {
+        params: {
+          location: `${lat},${lon}`,
+          radius: 5000,
+          type: 'pharmacy',
+          key: process.env.GOOGLE_MAPS_API_KEY
+        }
+      });
+      const list = Array.isArray(data.results) ? data.results.slice(0, 10) : [];
+      pharmacies = list.map(p => ({
+        name: p.name,
+        address: p.vicinity,
+        latitude: p.geometry?.location?.lat,
+        longitude: p.geometry?.location?.lng,
+        location_verified: true,
+        is_on_call: false
+      }));
+    } else {
+      const query = `[out:json];node["amenity"="pharmacy"](around:5000,${lat},${lon});out 10;`;
+      const { data } = await axios.post('https://overpass-api.de/api/interpreter',
+        `data=${encodeURIComponent(query)}`,
+        { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+      const list = Array.isArray(data.elements) ? data.elements.slice(0, 10) : [];
+      pharmacies = list.map(n => ({
+        name: n.tags?.name || 'Pharmacie',
+        address: `${n.tags?.['addr:street'] || ''} ${n.tags?.['addr:housenumber'] || ''}`.trim(),
+        latitude: n.lat,
+        longitude: n.lon,
+        location_verified: true,
+        is_on_call: false
+      }));
+    }
     res.json(pharmacies);
   } catch (err) {
-    console.error('google maps error', err.message);
+    console.error('pharmacy search error', err.message);
     res.status(500).json({ error: 'Erreur recherche pharmacies' });
   }
 });
