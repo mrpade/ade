@@ -1,13 +1,15 @@
 // src/pages/Register.jsx
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../services/api";
 import { AuthContext } from "../context/AuthContext";
 import PasswordStrengthMeter from "../components/PasswordStrengthMeter";
+import MapPicker from "../components/MapPicker";
 
 export default function Register() {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [mapPos, setMapPos] = useState([48.8566, 2.3522]); // default Paris
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -33,8 +35,31 @@ export default function Register() {
   });
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(pos => {
+        setMapPos([pos.coords.latitude, pos.coords.longitude]);
+      });
+    }
+  }, []);
+
   const handleChange = (e) =>
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+
+  const handleMapSelect = async (lat, lon) => {
+    setForm(f => ({ ...f, latitude: lat, longitude: lon }));
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`
+      );
+      const data = await res.json();
+      if (data.display_name) {
+        setForm(f => ({ ...f, address: data.display_name }));
+      }
+    } catch {
+      // ignore network errors
+    }
+  };
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -171,17 +196,20 @@ export default function Register() {
                   onChange={handleChange}
                   required
                 />
+                <MapPicker initialPosition={mapPos} onSelect={handleMapSelect} />
                 <input
                   name="latitude"
-                  placeholder="Latitude (opt.)"
+                  placeholder="Latitude"
                   value={form.latitude}
                   onChange={handleChange}
+                  readOnly
                 />
                 <input
                   name="longitude"
-                  placeholder="Longitude (opt.)"
+                  placeholder="Longitude"
                   value={form.longitude}
                   onChange={handleChange}
+                  readOnly
                 />
               </>
             )}
