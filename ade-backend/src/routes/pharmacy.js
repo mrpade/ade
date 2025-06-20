@@ -35,6 +35,17 @@ router.post('/pharmacies', auth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: 'Erreur création pharmacie' }); }
 });
 
+// GET /pharmacies/me – profil de la pharmacie connectée
+router.get('/pharmacies/me', auth, async (req, res) => {
+  try {
+    const pharmacy = await Pharmacy.findOne({ where: { user_id: req.user.id } });
+    if (!pharmacy) return res.status(404).json({ error: 'Pharmacie non trouvée' });
+    res.json(pharmacy);
+  } catch (err) {
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 // PUT /pharmacies/me/oncall  { is_on_call: true|false }
 router.put('/pharmacies/me/oncall', auth, async (req, res) => {
   try {
