@@ -52,7 +52,11 @@ module.exports = (sequelize, DataTypesParam = DataTypes) => {
 
   // Associations éventuelles
   DiseasesList.associate = (models) => {
-    // ex. DiseasesList.belongsTo(models.User);
+    DiseasesList.belongsToMany(models.Symptom, {
+      through: models.DiseaseSymptom,
+      foreignKey: 'disease_id',
+      otherKey: 'symptom_id'
+    });
   };
 
   return DiseasesList;

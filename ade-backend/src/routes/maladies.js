@@ -1,26 +1,9 @@
 const express = require('express');
 const { Op } = require('sequelize');
 const router = express.Router();
-const { DiseasesList } = require('../models');
+const { DiseasesList, Symptom, DiseaseSymptom } = require('../models');
+const { get: levenshtein } = require('fast-levenshtein');
 
-function levenshtein(a, b) {
-  const m = a.length;
-  const n = b.length;
-  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
-  for (let i = 0; i <= m; i++) dp[i][0] = i;
-  for (let j = 0; j <= n; j++) dp[0][j] = j;
-  for (let i = 1; i <= m; i++) {
-    for (let j = 1; j <= n; j++) {
-      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      dp[i][j] = Math.min(
-        dp[i - 1][j] + 1,
-        dp[i][j - 1] + 1,
-        dp[i - 1][j - 1] + cost
-      );
-    }
-  }
-  return dp[m][n];
-}
 
 function similarity(a, b) {
   if (!a && !b) return 1;
@@ -46,21 +29,50 @@ router.get('/', async (req, res) => {
       .map(s => s.trim().toLowerCase())
       .filter(Boolean);
 
-    // récupérer les maladies correspondant à au moins 1 terme
-    const candidates = await DiseasesList.findAll({
-      where: {
-        [Op.or]: terms.map(term => ({
-          Symptomes: { [Op.like]: `%${term}%` }
-        }))
-      }
+    const searchQuery = terms.map(t => `+${t}*`).join(' ');
+
+    const matchedSymptoms = await Symptom.findAll({
+      where: Symptom.sequelize.literal(
+        `MATCH(name) AGAINST(${Symptom.sequelize.escape(searchQuery)} IN BOOLEAN MODE)`
+      ),
+      attributes: ['id']
     });
 
+    const symptomIds = matchedSymptoms.map(s => s.id);
+    let candidates;
+    if (symptomIds.length) {
+      const linkRows = await DiseaseSymptom.findAll({
+        where: { symptom_id: { [Op.in]: symptomIds } }
+      });
+
+      const diseaseIds = [...new Set(linkRows.map(r => r.disease_id))];
+
+      candidates = await DiseasesList.findAll({
+        where: { id: { [Op.in]: diseaseIds } },
+        include: [{ model: Symptom, attributes: ['name'], through: { attributes: [] } }]
+      });
+    } else {
+      // fallback for legacy data without normalized symptoms
+      candidates = await DiseasesList.findAll({
+        where: {
+          [Op.or]: terms.map(term => ({
+            Symptomes: { [Op.like]: `%${term}%` }
+          }))
+        }
+      });
+    }
+
     const scored = candidates.map(item => {
-      const itemSyms = (item.Symptomes || '')
-        .toLowerCase()
-        .split(/[,;]+/)
-        .map(s => s.trim())
-        .filter(Boolean);
+      let itemSyms;
+      if (item.Symptoms && item.Symptoms.length) {
+        itemSyms = item.Symptoms.map(s => s.name.toLowerCase());
+      } else {
+        itemSyms = (item.Symptomes || '')
+          .toLowerCase()
+          .split(/[,;]+/)
+          .map(s => s.trim())
+          .filter(Boolean);
+      }
 
       const matchCount = terms.reduce(
         (acc, t) => acc + (itemSyms.includes(t) ? 1 : 0),
