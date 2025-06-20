@@ -7,7 +7,6 @@ import './PharmacyDashboard.css';
 export default function PharmacyDashboard() {
   const { token, logout } = useContext(AuthContext);
   const [pharmacy, setPharmacy] = useState(null);
-  const [user, setUser] = useState(null);
   const [form, setForm] = useState({ name: '', address: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -15,13 +14,6 @@ export default function PharmacyDashboard() {
   useEffect(() => {
     if (!token) return;
     const fetchData = async () => {
-      try {
-        const { data } = await api.get('/moncompte');
-        setUser(data);
-      } catch (err) {
-        console.error('Pharmacy dashboard user fetch error', err);
-        if (err.response?.status === 401) logout();
-      }
       try {
         const { data } = await api.get('/pharmacies/me');
         setPharmacy(data);
@@ -84,7 +76,7 @@ export default function PharmacyDashboard() {
         <aside className="profile-sidebar">
           <div className="profile-pic" />
           <h2 id='profile-name'>
-            {user ? `${user.first_name} ${user.last_name}` : ''}
+            {pharmacy.name}
             <span
               className={`status-indicator ${pharmacy.is_on_call ? 'green' : 'red'}`}
             />
