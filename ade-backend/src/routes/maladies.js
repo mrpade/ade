@@ -73,7 +73,6 @@ router.get('/', async (req, res) => {
           .map(s => s.trim())
           .filter(Boolean);
       }
-
       const matchCount = terms.reduce(
         (acc, t) => acc + (itemSyms.includes(t) ? 1 : 0),
         0

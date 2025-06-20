@@ -1,4 +1,3 @@
-// src/routes/symptomes.js
 const express = require('express');
 const { Op } = require('sequelize');
 const router = express.Router();
