@@ -14,6 +14,7 @@ import Profile         from './pages/Profile.jsx';
 import DoctorDashboard from './pages/DoctorDashboard.jsx';
 import PatientDashboard from './pages/PatientDashboard.jsx';
 import Pharmacie from './pages/Pharmacie.jsx';
+import PharmacyDashboard from './pages/PharmacyDashboard.jsx';
 import './index.css';
 
 export default function App() {
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="/doctor"    element={<DoctorDashboard />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/patient" element={<PatientDashboard />} />
+          <Route path="/pharmacy" element={<PharmacyDashboard />} />
           <Route path="/pharmacie" element={<Pharmacie />} />
 
           {/* Catch-all pour URL inconnues */}

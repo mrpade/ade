@@ -1,0 +1,166 @@
+#pharmacy-dashboard-container {
+  display: flex;
+  justify-content: space-between;
+  width: 80%;
+  height: 100vh;
+  margin: 0 auto;
+
+  h3 {
+  margin-block-start: 15px;
+  }
+}
+
+.pharmacy-dashboard-navbar {
+  height: 60px;
+  width: 100%;
+  background: white;
+  border-bottom: 1px solid #ccc;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  font-weight: bold;
+
+  h2 {
+    margin: 0;
+  }
+}
+
+.profile-sidebar {
+  width: 23%;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: white;
+}
+
+.profile-pic {
+  width: 50%;
+  aspect-ratio: 1/1;
+  background: #ddd;
+  border-radius: 10px;
+  margin-block-start: 25px;
+}
+
+#profile-name{
+    margin-block: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-indicator {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.status-indicator.green { background-color: var(--primary-color); }
+.status-indicator.red { background-color: var(--accent-color); }
+
+.btn.toggle {
+  margin-top: 10px;
+}
+
+#btn-edit, .btn-logout {
+  margin: 25px 0;
+}
+
+.btn-logout { background-color: var(--accent-color); color: white; }
+
+.sidebar-menu {
+  list-style: none;
+  padding: 20px;
+  margin: 0;
+  width: fit-content;
+  text-align: left;
+  font-size: 1.2em;
+
+  li {
+    margin-bottom: 25px;
+    border-bottom: 1px solid black;
+    cursor: pointer;
+    color: #333;
+    transition: transform .3s ease-in-out;
+  }
+}
+.sidebar-menu li:hover {
+  transform: scale(1.1);
+}
+
+.dashboard-content {
+  overflow-y: auto;
+  width: 75%;
+}
+
+.section{
+    margin-inline-start: 20px;
+}
+
+.card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.card {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+  width: fit-content !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.badge {
+  font-size: 0.75em;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: white;
+}
+
+.badge.green { background-color: var(--primary-color); }
+
+.card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.btn {
+  flex: 1;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn.green { background-color: #007f5f; color: white; }
+.btn.pink { background-color: #e91e63; color: white; }
+
+.pharma-form input {
+  display: block;
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 6px;
+}
+
+.error { color: red; }
+
+.empty-state {
+  padding: 20px;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}
