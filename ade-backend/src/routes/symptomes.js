@@ -1,8 +1,7 @@
-// src/routes/symptomes.js
 const express = require('express');
 const { Op } = require('sequelize');
 const router = express.Router();
-const { Symptom, sequelize } = require('../models');
+const { Symptom, DiseasesList, sequelize } = require('../models');
 
 /**
  * GET /api/symptomes?q=fièv
@@ -23,6 +22,27 @@ router.get('/', async (req, res) => {
       attributes: ['name'],
       limit: 10
     });
+
+    if (!suggestionsRows.length) {
+      const rows = await DiseasesList.findAll({
+        attributes: ['Symptomes'],
+        where: { Symptomes: { [Op.like]: `%${term}%` } }
+      });
+
+      const set = new Set();
+      rows.forEach(r => {
+        (r.Symptomes || '')
+          .split(',')
+          .map(s => s.trim())
+          .forEach(s => {
+            if (s.toLowerCase().startsWith(term)) {
+              set.add(s);
+            }
+          });
+      });
+      return res.json(Array.from(set).slice(0, 10));
+    }
+
     res.json(suggestionsRows.map(s => s.name));
 
   } catch (err) {

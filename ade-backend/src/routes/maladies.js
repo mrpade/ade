@@ -39,25 +39,40 @@ router.get('/', async (req, res) => {
     });
 
     const symptomIds = matchedSymptoms.map(s => s.id);
-    if (!symptomIds.length) {
-      return res.json([]);
+    let candidates;
+    if (symptomIds.length) {
+      const linkRows = await DiseaseSymptom.findAll({
+        where: { symptom_id: { [Op.in]: symptomIds } }
+      });
+
+      const diseaseIds = [...new Set(linkRows.map(r => r.disease_id))];
+
+      candidates = await DiseasesList.findAll({
+        where: { id: { [Op.in]: diseaseIds } },
+        include: [{ model: Symptom, attributes: ['name'], through: { attributes: [] } }]
+      });
+    } else {
+      // fallback for legacy data without normalized symptoms
+      candidates = await DiseasesList.findAll({
+        where: {
+          [Op.or]: terms.map(term => ({
+            Symptomes: { [Op.like]: `%${term}%` }
+          }))
+        }
+      });
     }
 
-    const linkRows = await DiseaseSymptom.findAll({
-      where: { symptom_id: { [Op.in]: symptomIds } }
-    });
-
-    const diseaseIds = [...new Set(linkRows.map(r => r.disease_id))];
-
-    const candidates = await DiseasesList.findAll({
-      where: { id: { [Op.in]: diseaseIds } },
-      include: [{ model: Symptom, attributes: ['name'], through: { attributes: [] } }]
-    });
-
     const scored = candidates.map(item => {
-      const itemSyms = (item.Symptoms || [])
-        .map(s => s.name.toLowerCase());
-
+      let itemSyms;
+      if (item.Symptoms && item.Symptoms.length) {
+        itemSyms = item.Symptoms.map(s => s.name.toLowerCase());
+      } else {
+        itemSyms = (item.Symptomes || '')
+          .toLowerCase()
+          .split(/[,;]+/)
+          .map(s => s.trim())
+          .filter(Boolean);
+      }
       const matchCount = terms.reduce(
         (acc, t) => acc + (itemSyms.includes(t) ? 1 : 0),
         0
