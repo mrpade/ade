@@ -51,6 +51,8 @@ db.Product      = require('./Product')(sequelize, DataTypes);
 db.PharmacyStock = require('./PharmacyStock')(sequelize, DataTypes);
 db.Order        = require('./Order')(sequelize, DataTypes);
 db.OrderItem    = require('./OrderItem')(sequelize, DataTypes);
+db.Symptom      = require('./Symptom')(sequelize, DataTypes);
+db.DiseaseSymptom = require('./DiseaseSymptom')(sequelize, DataTypes);
 db.Delivery     = require('./Delivery')(sequelize, DataTypes);
 db.Check        = require('./Check')(sequelize, DataTypes);
 
