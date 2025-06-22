@@ -57,7 +57,7 @@ export default function Navbar() {
     role === 'doctor' ? '/doctor'
     : role === 'pharmacy' ? '/pharmacy'
     : role === 'courier' ? '/courier'
-    : '/patient';
+    : role === 'admin' ? '/admin' : '/patient';
 
   const navigate = useNavigate();
 
@@ -78,6 +78,9 @@ export default function Navbar() {
         <NavLink to="/maladies" className="navbar__link">Diagnostic</NavLink>
         <NavLink to="/consultation" className="navbar__link">Consultation</NavLink>
         <NavLink to="/pharmacie" className="navbar__link">e-Pharmacie</NavLink>
+        {token && role === 'admin' && (
+          <NavLink to="/admin" className="navbar__link">Administration</NavLink>
+        )}
         {token && (
           <NavLink to={dashboardLink} className="navbar__link">Mon compte</NavLink>
         )}

@@ -28,10 +28,11 @@ export default function Login() {
     try {
       const { data } = await api.post('/auth/login', { email, password });
       login(data.token, data.role);
-      if (data.role === 'doctor')      navigate('/doctor');
-        else if (data.role === 'pharmacy') navigate('/pharmacy');
-        else if (data.role === 'courier')  navigate('/courier');
-        else                               navigate('/patient'); // patient par défaut       // <-- redirection vers la page Profil
+      if (data.role === 'admin')         navigate('/admin');
+        else if (data.role === 'doctor')      navigate('/doctor');
+        else if (data.role === 'pharmacy')    navigate('/pharmacy');
+        else if (data.role === 'courier')     navigate('/courier');
+        else                                  navigate('/patient'); // patient par défaut
     } catch (err) {
       console.error('Erreur login:', err);
       setError(err.response?.data?.error || 'Erreur de connexion');
