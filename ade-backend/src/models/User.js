@@ -2,7 +2,7 @@ module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
     id: { type: DataTypes.INTEGER.UNSIGNED, primaryKey: true, autoIncrement: true },
     role: {
-      type: DataTypes.ENUM('patient','doctor','pharmacy','courier'),
+      type: DataTypes.ENUM('patient','doctor','pharmacy','courier','admin'),
       allowNull: false,
       defaultValue: 'patient'
     },

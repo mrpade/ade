@@ -1,0 +1,21 @@
+.admin-dashboard {
+  margin-top: 2rem;
+}
+.question-form input,
+.question-form select {
+  margin-right: 0.5rem;
+}
+.question-list {
+  list-style: none;
+  padding: 0;
+}
+.question-item {
+  border: 1px solid #ccc;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+}
+.question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
