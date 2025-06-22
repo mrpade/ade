@@ -9,7 +9,7 @@ import MapPicker from "../components/MapPicker";
 export default function Register() {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [mapPos, setMapPos] = useState([48.8566, 2.3522]);
+  const [mapPos, setMapPos] = useState([48.8566, 2.3522]); // default Paris
   const [form, setForm] = useState({
     email: "",
     password: "",

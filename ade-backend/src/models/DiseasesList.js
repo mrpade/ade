@@ -51,7 +51,7 @@ module.exports = (sequelize, DataTypesParam = DataTypes) => {
   });
 
   // Associations éventuelles
-   DiseasesList.associate = (models) => {
+  DiseasesList.associate = (models) => {
     DiseasesList.belongsToMany(models.Symptom, {
       through: models.DiseaseSymptom,
       foreignKey: 'disease_id',

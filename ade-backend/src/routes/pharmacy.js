@@ -66,29 +66,22 @@ router.get('/pharmacies/near', async (req, res) => {
   try {
     let pharmacies = [];
     // Local pharmacies registered in the app
-    let allLocal = [];
-    try {
-      allLocal = await Pharmacy.findAll();
-    } catch (dbErr) {
-      console.error('pharmacy db error', dbErr.message);
-    }
+    const allLocal = await Pharmacy.findAll();
     const withinRadius = (p) => {
-      const lat2 = parseFloat(p.latitude);
-      const lon2 = parseFloat(p.longitude);
-      if (!Number.isFinite(lat2) || !Number.isFinite(lon2)) return false;
+      if (!p.latitude || !p.longitude) return false;
       const toRad = (deg) => deg * Math.PI / 180;
       const R = 6371; // km
-      const dLat = toRad(lat2 - lat);
-      const dLon = toRad(lon2 - lon);
-      const a = Math.sin(dLat/2) ** 2 + Math.cos(toRad(lat)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2) ** 2;
+      const dLat = toRad(p.latitude - lat);
+      const dLon = toRad(p.longitude - lon);
+      const a = Math.sin(dLat/2) ** 2 + Math.cos(toRad(lat)) * Math.cos(toRad(p.latitude)) * Math.sin(dLon/2) ** 2;
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
       return R * c <= 5; // 5km
     };
     pharmacies = allLocal.filter(withinRadius).map(p => ({
       name: p.name,
       address: p.address,
-      latitude: parseFloat(p.latitude),
-      longitude: parseFloat(p.longitude),
+      latitude: p.latitude,
+      longitude: p.longitude,
       location_verified: p.location_verified,
       is_on_call: p.is_on_call
     }));

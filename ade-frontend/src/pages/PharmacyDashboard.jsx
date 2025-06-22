@@ -7,6 +7,10 @@ import './PharmacyDashboard.css';
 export default function PharmacyDashboard() {
   const { token, logout } = useContext(AuthContext);
   const [pharmacy, setPharmacy] = useState(null);
+<<<<<<< HEAD
+=======
+  const [user, setUser] = useState(null);
+>>>>>>> d8e7844f6d1cbbbfa1dae6024e3df08defe0809f
   const [form, setForm] = useState({ name: '', address: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -15,6 +19,16 @@ export default function PharmacyDashboard() {
     if (!token) return;
     const fetchData = async () => {
       try {
+<<<<<<< HEAD
+=======
+        const { data } = await api.get('/moncompte');
+        setUser(data);
+      } catch (err) {
+        console.error('Pharmacy dashboard user fetch error', err);
+        if (err.response?.status === 401) logout();
+      }
+      try {
+>>>>>>> d8e7844f6d1cbbbfa1dae6024e3df08defe0809f
         const { data } = await api.get('/pharmacies/me');
         setPharmacy(data);
       } catch (err) {
@@ -103,4 +117,8 @@ export default function PharmacyDashboard() {
         </section>
     </div>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> d8e7844f6d1cbbbfa1dae6024e3df08defe0809f
