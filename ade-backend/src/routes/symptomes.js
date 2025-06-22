@@ -9,7 +9,7 @@ const { Symptom, DiseasesList, sequelize } = require('../models');
  */
 router.get('/', async (req, res) => {
   try {
-    const { q } = req.query;
+    const { q, full } = req.query;
     if (!q || q.trim() === '') {
       return res.json([]);
     }
@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
       where: sequelize.literal(
         `MATCH(name) AGAINST(${sequelize.escape(term + '*')} IN BOOLEAN MODE)`
       ),
-      attributes: ['name'],
+      attributes: full ? ['id', 'name'] : ['name'],
       limit: 10
     });
 
@@ -40,9 +40,16 @@ router.get('/', async (req, res) => {
             }
           });
       });
-      return res.json(Array.from(set).slice(0, 10));
+      const arr = Array.from(set).slice(0, 10);
+      if (full) {
+        return res.json(arr.map(name => ({ id: null, name })));
+      }
+      return res.json(arr);
     }
 
+    if (full) {
+      return res.json(suggestionsRows.map(s => ({ id: s.id, name: s.name })));
+    }
     res.json(suggestionsRows.map(s => s.name));
 
   } catch (err) {

@@ -1,15 +1,14 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useMemo } from 'react';
+import debounce from 'lodash.debounce';
 import { AuthContext } from '../context/AuthContext';
+import api from '../services/api';
 import {
   fetchQuestions,
   createQuestion,
-  updateQuestion,
   deleteQuestion,
   addOption,
-  updateOption,
   deleteOption,
   addImpact,
-  updateImpact,
   deleteImpact
 } from '../api/admin';
 import './AdminDashboard.css';
@@ -20,6 +19,9 @@ export default function AdminDashboard() {
   const [form, setForm] = useState({ question_text: '', question_type: 'yes_no', trigger_symptom_id: '' });
   const [search, setSearch] = useState('');
   const [error, setError] = useState('');
+  const [symInput, setSymInput] = useState('');
+  const [symSuggestions, setSymSuggestions] = useState([]);
+  const [showSymSug, setShowSymSug] = useState(false);
 
   const load = async () => {
     try {
@@ -35,8 +37,6 @@ export default function AdminDashboard() {
     if (role === 'admin' && token) load();
   }, [token, role]);
 
-  if (role !== 'admin') return <p>Access Denied</p>;
-
   const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
 
   const handleCreate = async e => {
@@ -44,6 +44,7 @@ export default function AdminDashboard() {
     try {
       await createQuestion(form);
       setForm({ question_text: '', question_type: 'yes_no', trigger_symptom_id: '' });
+      setSymInput('');
       load();
     } catch(err) {
       console.error('create question', err);
@@ -67,10 +68,29 @@ export default function AdminDashboard() {
     load();
   };
 
+  const fetchSymSug = useMemo(() =>
+    debounce(async frag => {
+      if (!frag) { setSymSuggestions([]); return; }
+      try {
+        const { data } = await api.get('/symptomes', { params: { q: frag, full: 1 } });
+        setSymSuggestions(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('symptom suggestions', err);
+      }
+    }, 300)
+  , []);
+
+  useEffect(() => {
+    fetchSymSug(symInput.trim());
+    return () => fetchSymSug.cancel();
+  }, [symInput, fetchSymSug]);
+
+  if (role !== 'admin') return <p>Access Denied</p>;
+
   return (
     <div className="container admin-dashboard">
       <h1>Administration</h1>
-      <form onSubmit={handleCreate} className="question-form">
+      <form onSubmit={handleCreate} className="question-form" autoComplete="off">
         <input name="question_text" placeholder="Texte" value={form.question_text} onChange={handleChange} required />
         <select name="question_type" value={form.question_type} onChange={handleChange}>
           <option value="yes_no">Oui/Non</option>
@@ -78,6 +98,27 @@ export default function AdminDashboard() {
           <option value="number">Nombre</option>
           <option value="scale">Echelle</option>
         </select>
+        <div style={{ position: 'relative' }}>
+          <input
+            type="text"
+            placeholder="Symptôme"
+            value={symInput}
+            onChange={e => { setSymInput(e.target.value); setShowSymSug(true); }}
+            onFocus={() => setShowSymSug(true)}
+          />
+          {showSymSug && symSuggestions.length > 0 && (
+            <ul className="suggestions-list">
+              {symSuggestions.map(s => (
+                <li
+                  key={s.id || s.name}
+                  onMouseDown={() => { setSymInput(s.name); setForm(f => ({ ...f, trigger_symptom_id: s.id || '' })); setShowSymSug(false); }}
+                >
+                  {s.name}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
         <input name="trigger_symptom_id" placeholder="Symptom ID" value={form.trigger_symptom_id} onChange={handleChange} />
         <button type="submit">Créer</button>
       </form>
