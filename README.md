@@ -81,11 +81,12 @@ Voir le fichier `.env.example` pour la liste complète et les clés attendues.
 
 ### Backend
 
-Modèles Sequelize : `User`, `DiseasesList`, `Search`, etc.
+Modèles Sequelize : `User`, `DiseasesList`, `Search` ainsi que `Question`, `QuestionOption`, `OptionImpact` et `UserQuestionResponse` pour la recherche interactive.
 
 Routes principales :
 
 - `/api/maladies?symptomes=...`
+- `/api/maladies/interactive` (POST) – recherche interactive avec questions
 - `/api/symptomes?q=...`
 - `/api/pharmacies?lat=...&lng=...&filter=...`
 - `/api/auth` & `/api/moncompte`
