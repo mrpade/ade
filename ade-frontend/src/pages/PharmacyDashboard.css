@@ -1,6 +1,4 @@
-
-
-#doc-dashboard-container {
+#pharmacy-dashboard-container {
   display: flex;
   justify-content: space-between;
   width: 80%;
@@ -9,10 +7,10 @@
 
   h3 {
   margin-block-start: 15px;
-}
+  }
 }
 
-.doc-dashboard-navbar {
+.pharmacy-dashboard-navbar {
   height: 60px;
   width: 100%;
   background: white;
@@ -24,10 +22,8 @@
 
   h2 {
     margin: 0;
+  }
 }
-}
-
-
 
 .profile-sidebar {
   width: 23%;
@@ -71,9 +67,6 @@
   margin: 25px 0;
 }
 
-#btn-edit:hover{
-    background-color: var(--accent-color);
-}
 .btn-logout { background-color: var(--accent-color); color: white; }
 
 .sidebar-menu {
@@ -105,15 +98,13 @@
     margin-inline-start: 20px;
 }
 
-
-
 .card-grid {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
 }
 
-#doc-dashboard-card {
+.card {
   background: white;
   padding: 15px;
   border-radius: 10px;
@@ -158,8 +149,7 @@
 .btn.green { background-color: #007f5f; color: white; }
 .btn.pink { background-color: #e91e63; color: white; }
 
-.doc-form input,
-.doc-form textarea {
+.pharma-form input {
   display: block;
   width: 100%;
   margin-bottom: 8px;

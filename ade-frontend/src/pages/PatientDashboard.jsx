@@ -50,7 +50,7 @@ export default function PatientDashboard() {
             <h2>Mes Checks</h2>
             <div className="grid">
               {checks.map(check => (
-                <div className="card" key={check.id}>
+                <div className="" id="patient-dashboard-card" key={check.id}>
                   <div className="card-header">
                     <strong>{check.doctorName}, {check.doctorSpecialty}</strong>
                     <span className="badge green">Profil</span>

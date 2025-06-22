@@ -2,6 +2,7 @@
 import api from '../services/api';
 export const createPharmacyProfile = (payload) => api.post('/pharmacies', payload);
 export const toggleOnCall = (flag) => api.put('/pharmacies/me/oncall', { is_on_call: flag });
+export const getPharmacyProfile = () => api.get('/pharmacies/me');
 
 // Exemple d’usage dans PharmacyDashboard.jsx
 /*

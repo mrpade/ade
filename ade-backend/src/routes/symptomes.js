@@ -1,8 +1,7 @@
-// src/routes/symptomes.js
 const express = require('express');
 const { Op } = require('sequelize');
 const router = express.Router();
-const { DiseasesList } = require('../models');
+const { Symptom, DiseasesList, sequelize } = require('../models');
 
 /**
  * GET /api/symptomes?q=fièv
@@ -16,30 +15,35 @@ router.get('/', async (req, res) => {
     }
     const term = q.trim().toLowerCase();
 
-    // Récupère tous les champs Symptomes qui contiennent la sous-chaîne
-    const rows = await DiseasesList.findAll({
-      attributes: ['Symptomes']
-      , where: {
-        Symptomes: { [Op.like]: `%${term}%` }
-      }
+    const suggestionsRows = await Symptom.findAll({
+      where: sequelize.literal(
+        `MATCH(name) AGAINST(${sequelize.escape(term + '*')} IN BOOLEAN MODE)`
+      ),
+      attributes: ['name'],
+      limit: 10
     });
 
-    // Explose et collecte les valeurs distinctes commençant par `term`
-    const set = new Set();
-    rows.forEach(r => {
-      (r.Symptomes || '')
-        .split(',')
-        .map(s => s.trim())
-        .forEach(s => {
-          if (s.toLowerCase().startsWith(term)) {
-            set.add(s);
-          }
-        });
-    });
+    if (!suggestionsRows.length) {
+      const rows = await DiseasesList.findAll({
+        attributes: ['Symptomes'],
+        where: { Symptomes: { [Op.like]: `%${term}%` } }
+      });
 
-    // Limite à 10 suggestions maximum
-    const suggestions = Array.from(set).slice(0, 10);
-    res.json(suggestions);
+      const set = new Set();
+      rows.forEach(r => {
+        (r.Symptomes || '')
+          .split(',')
+          .map(s => s.trim())
+          .forEach(s => {
+            if (s.toLowerCase().startsWith(term)) {
+              set.add(s);
+            }
+          });
+      });
+      return res.json(Array.from(set).slice(0, 10));
+    }
+
+    res.json(suggestionsRows.map(s => s.name));
 
   } catch (err) {
     console.error(err);

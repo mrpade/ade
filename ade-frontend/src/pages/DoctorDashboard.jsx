@@ -171,7 +171,7 @@ export default function DoctorDashboard() {
             ) : (
               <div className="card-grid">
                 {checks.map(check => (
-                  <div className="card" key={check.id}>
+                  <div className="" id="doc-dashboard-card" key={check.id}>
                     <div className="card-header">
                       <strong>{check.patientName}, {check.age}, {check.gender}</strong>
                       <span className="badge green">Carnet</span>
