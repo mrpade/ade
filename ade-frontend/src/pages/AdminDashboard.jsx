@@ -5,7 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 import {
   fetchSymptoms,
   fetchQuestions,
-  fetchResponses,
+  fetchOptions,
   fetchScores
 } from '../api/admin'; // your admin-specific API methods
 import './AdminDashboard.css';
@@ -20,10 +20,10 @@ export default function AdminDashboard() {
   const perPage = 9;
 
   const [selectedSymptom, setSelectedSymptom] = useState(null);
-  const [viewType, setViewType] = useState('questions'); // 'questions' | 'responses' | 'scores'
+  const [viewType, setViewType] = useState('questions'); // 'questions' | 'options' | 'scores'
 
   const [questions, setQuestions] = useState([]);
-  const [responses, setResponses] = useState([]);
+  const [options, setOptions] = useState([]);
   const [scores, setScores] = useState([]);
 
   // --- Load Symptoms ---
@@ -44,9 +44,9 @@ export default function AdminDashboard() {
       if (viewType === 'questions') {
         const { data } = await fetchQuestions({ symptom: id });
         setQuestions(data);
-      } else if (viewType === 'responses') {
-        const { data } = await fetchResponses(id);
-        setResponses(data);
+      } else if (viewType === 'options') {
+        const { data } = await fetchOptions(id);
+        setOptions(data);
       } else if (viewType === 'scores') {
         const { data } = await fetchScores(id);
         setScores(data);
@@ -132,7 +132,7 @@ export default function AdminDashboard() {
                     onChange={(e) => setViewType(e.target.value)}
                   >
                     <option value="questions">Questions</option>
-                    <option value="responses">Réponses</option>
+                    <option value="options">Options</option>
                     <option value="scores">Score</option>
                   </select>
                 </div>
@@ -151,16 +151,16 @@ export default function AdminDashboard() {
                     </>
                   )}
 
-                  {viewType === 'responses' && (
+                  {viewType === 'options' && (
                     <>
-                      {responses.length > 0 ? (
+                      {options.length > 0 ? (
                         <ul>
-                          {responses.map((r) => (
-                            <li key={r.id}>{r.text}</li>
+                          {options.map((o) => (
+                            <li key={o.id}>{o.text}</li>
                           ))}
                         </ul>
                       ) : (
-                        <button className="add-btn">Ajouter une réponse</button>
+                        <button className="add-btn">Ajouter une option</button>
                       )}
                     </>
                   )}
