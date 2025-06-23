@@ -29,6 +29,25 @@ router.get('/symptoms', async (req, res) => {
   }
 });
 
+// GET /admin/symptoms/:id/diseases
+router.get('/symptoms/:id/diseases', async (req, res) => {
+  try {
+    const list = await DiseasesList.findAll({
+      include: [{
+        model: Symptom,
+        through: { attributes: [] },
+        where: { id: req.params.id }
+      }],
+      order: [['Nom', 'ASC']]
+    });
+    const mapped = list.map(d => ({ id: d.id, name: d.Nom }));
+    res.json(mapped);
+  } catch (err) {
+    console.error('[ADMIN][GET /symptoms/:id/diseases]', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // GET /admin/questions?symptom=...
 router.get('/questions', async (req, res) => {
   try {

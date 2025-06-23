@@ -94,3 +94,10 @@
   border-radius: 4px;
   cursor: pointer;
 }
+
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}

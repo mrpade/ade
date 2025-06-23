@@ -19,3 +19,6 @@ export const fetchOptions = symptomId =>
   api.get(`/admin/options/${symptomId}`);
 
 export const fetchScores = symptomId => api.get(`/admin/scores/${symptomId}`);
+
+export const fetchRelatedDiseases = symptomId =>
+  api.get(`/admin/symptoms/${symptomId}/diseases`);
