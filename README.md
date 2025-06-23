@@ -81,7 +81,7 @@ Voir le fichier `.env.example` pour la liste complète et les clés attendues.
 
 ### Backend
 
-Modèles Sequelize : `User`, `DiseasesList`, `Search` ainsi que `Question`, `QuestionOption`, `OptionImpact` et `UserQuestionResponse` pour la recherche interactive.
+Modèles Sequelize : `User`, `DiseasesList`, `Search` ainsi que `Question`, `QuestionOption`, `OptionImpact` et `UserQuestionResponse` pour la recherche interactive.
 
 Routes principales :
 

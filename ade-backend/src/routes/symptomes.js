@@ -46,7 +46,7 @@ router.get('/', async (req, res) => {
       }
       return res.json(arr);
     }
-    
+
     if (full) {
       return res.json(suggestionsRows.map(s => ({ id: s.id, name: s.name })));
     }
