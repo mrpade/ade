@@ -55,6 +55,10 @@ db.Symptom      = require('./Symptom')(sequelize, DataTypes);
 db.DiseaseSymptom = require('./DiseaseSymptom')(sequelize, DataTypes);
 db.Delivery     = require('./Delivery')(sequelize, DataTypes);
 db.Check        = require('./Check')(sequelize, DataTypes);
+db.Question     = require('./Question')(sequelize, DataTypes);
+db.QuestionOption = require('./QuestionOption')(sequelize, DataTypes);
+db.OptionImpact = require('./OptionImpact')(sequelize, DataTypes);
+db.UserQuestionResponse = require('./UserQuestionResponse')(sequelize, DataTypes);
 
  // Mise en place des associations, si définies dans chaque modèle
  Object.keys(db).forEach(name => {

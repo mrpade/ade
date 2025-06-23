@@ -1,0 +1,83 @@
+/* src/components/AdminDashboard.css */
+
+.admin-dashboard {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.sidebar {
+  flex: 0 0 150px;
+}
+.sidebar ul {
+  list-style: none;
+}
+.sidebar li {
+  padding: 0.75rem;
+  cursor: pointer;
+}
+.sidebar li.active {
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
+.main-content {
+  flex: 1;
+}
+
+.symptom-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.symptom-btn {
+  padding: 0.5rem;
+  border: 2px solid #ccc;
+  border-radius: 20px;
+  background: transparent;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+.symptom-btn:hover {
+  border-color: var(--primary-color);
+}
+.symptom-btn.selected {
+  border-color: var(--primary-color);
+  background: rgba(22, 102, 53, 0.1);
+}
+
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+.detail-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.add-btn {
+  padding: 0.5rem 1rem;
+  background: var(--accent-color);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
