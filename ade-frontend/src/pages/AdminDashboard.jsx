@@ -6,12 +6,16 @@ import {
   fetchSymptoms,
   fetchQuestions,
   fetchOptions,
-  fetchScores
+  fetchScores,
+  fetchRelatedDiseases,
+  createQuestion,
+  addOption,
+  addImpact
 } from '../api/admin'; // your admin-specific API methods
 import './AdminDashboard.css';
 
 export default function AdminDashboard() {
-  const { token, role } = useContext(AuthContext);
+  const { role } = useContext(AuthContext);
 
   // --- UI State ---
   const [section, setSection] = useState('symptoms');
@@ -25,6 +29,16 @@ export default function AdminDashboard() {
   const [questions, setQuestions] = useState([]);
   const [options, setOptions] = useState([]);
   const [scores, setScores] = useState([]);
+  const [diseases, setDiseases] = useState([]);
+
+  const [showQuestionForm, setShowQuestionForm] = useState(false);
+  const [newQuestion, setNewQuestion] = useState({ text: '', type: 'yes_no' });
+
+  const [showOptionForm, setShowOptionForm] = useState(false);
+  const [newOption, setNewOption] = useState({ questionId: '', values: [''] });
+
+  const [showScoreForm, setShowScoreForm] = useState(false);
+  const [newScore, setNewScore] = useState({ optionId: '', diseaseId: '', value: '' });
 
   // --- Load Symptoms ---
   useEffect(() => {
@@ -50,11 +64,82 @@ export default function AdminDashboard() {
       } else if (viewType === 'scores') {
         const { data } = await fetchScores(id);
         setScores(data);
+        const optRes = await fetchOptions(id);
+        setOptions(optRes.data);
       }
     };
 
     loadDetail();
   }, [selectedSymptom, viewType]);
+
+  // Load diseases when symptom changes
+  useEffect(() => {
+    if (!selectedSymptom) return;
+    const loadDiseases = async () => {
+      const { data } = await fetchRelatedDiseases(selectedSymptom.id);
+      setDiseases(data);
+    };
+    loadDiseases();
+  }, [selectedSymptom]);
+
+  const handleCreateQuestion = async e => {
+    e.preventDefault();
+    if (!selectedSymptom) return;
+    try {
+      await createQuestion({
+        question_text: newQuestion.text,
+        question_type: newQuestion.type,
+        trigger_symptom_id: selectedSymptom.id
+      });
+      const { data } = await fetchQuestions({ symptom: selectedSymptom.id });
+      setQuestions(data);
+      setShowQuestionForm(false);
+      setNewQuestion({ text: '', type: 'yes_no' });
+    } catch (err) {
+      console.error('create question error', err);
+    }
+  };
+
+  const handleCreateOption = async e => {
+    e.preventDefault();
+    try {
+      const qId = parseInt(newOption.questionId, 10);
+      const q = questions.find(q => q.id === qId);
+      if (!q) return;
+      if (q.question_type === 'yes_no') {
+        await addOption(qId, { option_label: 'Yes' });
+        await addOption(qId, { option_label: 'No' });
+      } else {
+        for (const val of newOption.values) {
+          if (val && val.trim() !== '') {
+            await addOption(qId, { option_label: val });
+          }
+        }
+      }
+      const { data } = await fetchOptions(selectedSymptom.id);
+      setOptions(data);
+      setShowOptionForm(false);
+      setNewOption({ questionId: '', values: [''] });
+    } catch (err) {
+      console.error('create option error', err);
+    }
+  };
+
+  const handleCreateScore = async e => {
+    e.preventDefault();
+    try {
+      await addImpact(newScore.optionId, {
+        disease_id: newScore.diseaseId,
+        score_delta: newScore.value
+      });
+      const { data } = await fetchScores(selectedSymptom.id);
+      setScores(data);
+      setShowScoreForm(false);
+      setNewScore({ optionId: '', diseaseId: '', value: '' });
+    } catch (err) {
+      console.error('create score error', err);
+    }
+  };
 
   if (role !== 'admin') return <p>Access Denied</p>;
 
@@ -145,35 +230,98 @@ export default function AdminDashboard() {
                 <div className="card-body">
                   {viewType === 'questions' && (
                     <>
-                      {questions.length > 0 ? (
+                      {questions.length > 0 && (
                         <ol>
                           {questions.map((q) => (
                             <li key={q.id}>{q.question_text}</li>
                           ))}
                         </ol>
+                      )}
+                      {showQuestionForm ? (
+                        <form onSubmit={handleCreateQuestion} className="admin-form">
+                          <input
+                            value={newQuestion.text}
+                            onChange={e => setNewQuestion(n => ({ ...n, text: e.target.value }))}
+                            placeholder="Question"
+                            required
+                          />
+                          <select
+                            value={newQuestion.type}
+                            onChange={e => setNewQuestion(n => ({ ...n, type: e.target.value }))}
+                          >
+                            <option value="yes_no">Oui/Non</option>
+                            <option value="multiple_choice">Choix multiple</option>
+                            <option value="number">Nombre</option>
+                            <option value="scale">Échelle</option>
+                          </select>
+                          <button type="submit" className="add-btn">Valider</button>
+                        </form>
                       ) : (
-                        <button className="add-btn">Ajouter une question</button>
+                        <button className="add-btn" onClick={() => setShowQuestionForm(true)}>
+                          Ajouter une question
+                        </button>
                       )}
                     </>
                   )}
 
                   {viewType === 'options' && (
                     <>
-                      {options.length > 0 ? (
+                      {options.length > 0 && (
                         <ul>
                           {options.map((o) => (
                             <li key={o.id}>{o.text}</li>
                           ))}
                         </ul>
+                      )}
+                      {showOptionForm ? (
+                        <form onSubmit={handleCreateOption} className="admin-form">
+                          <select
+                            value={newOption.questionId}
+                            onChange={e => {
+                              const id = e.target.value;
+                              setNewOption(o => ({ ...o, questionId: id }));
+                            }}
+                            required
+                          >
+                            <option value="">-- Question --</option>
+                            {questions.map(q => (
+                              <option key={q.id} value={q.id}>{q.question_text}</option>
+                            ))}
+                          </select>
+                          {(() => {
+                            const q = questions.find(q => q.id === parseInt(newOption.questionId,10));
+                            if (q?.question_type === 'yes_no') {
+                              return <p>Options "Yes" et "No" ajoutées automatiquement</p>;
+                            }
+                            const count = q?.question_type === 'multiple_choice' ? 4 : 1;
+                            const fields = [];
+                            for (let i=0;i<count;i++) {
+                              fields.push(
+                                <input
+                                  key={i}
+                                  value={newOption.values[i] || ''}
+                                  onChange={e => {
+                                    const vals = [...newOption.values];
+                                    vals[i] = e.target.value;
+                                    setNewOption(o => ({ ...o, values: vals }));
+                                  }}
+                                  placeholder={`Option ${i+1}`}
+                                />
+                              );
+                            }
+                            return fields;
+                          })()}
+                          <button type="submit" className="add-btn">Valider</button>
+                        </form>
                       ) : (
-                        <button className="add-btn">Ajouter une option</button>
+                        <button className="add-btn" onClick={() => setShowOptionForm(true)}>Ajouter une option</button>
                       )}
                     </>
                   )}
 
                   {viewType === 'scores' && (
                     <>
-                      {scores.length > 0 ? (
+                      {scores.length > 0 && (
                         <ul>
                           {scores.map((s) => (
                             <li key={s.id}>
@@ -181,19 +329,59 @@ export default function AdminDashboard() {
                             </li>
                           ))}
                         </ul>
+                      )}
+                      {showScoreForm ? (
+                        <form onSubmit={handleCreateScore} className="admin-form">
+                          <select
+                            value={newScore.optionId}
+                            onChange={e => setNewScore(s => ({ ...s, optionId: e.target.value }))}
+                            required
+                          >
+                            <option value="">-- Option --</option>
+                            {options.map(o => (
+                              <option key={o.id} value={o.id}>{o.text}</option>
+                            ))}
+                          </select>
+                          <select
+                            value={newScore.diseaseId}
+                            onChange={e => setNewScore(s => ({ ...s, diseaseId: e.target.value }))}
+                            required
+                          >
+                            <option value="">-- Maladie --</option>
+                            {diseases.map(d => (
+                              <option key={d.id} value={d.id}>{d.name}</option>
+                            ))}
+                          </select>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={newScore.value}
+                            onChange={e => setNewScore(s => ({ ...s, value: e.target.value }))}
+                            placeholder="Score"
+                            required
+                          />
+                          <button type="submit" className="add-btn">Valider</button>
+                        </form>
                       ) : (
-                        <button className="add-btn">Ajouter un score</button>
+                        <button className="add-btn" onClick={() => setShowScoreForm(true)}>Ajouter un score</button>
                       )}
                     </>
                   )}
                 </div>
               </div>
 
-              {/* Bottom‐Right Card (example placeholder) */}
+              {/* Bottom‐Right Card */}
               <div className="admin-dashboard-card">
                 <h2>Maladies liées</h2>
-                {/* you can fill this similarly from your API */}
-                <p>…</p>
+                {diseases.length === 0 ? (
+                  <p>Aucune maladie</p>
+                ) : (
+                  <ul>
+                    {diseases.map(d => (
+                      <li key={d.id}>{d.name}</li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </div>
           </>
