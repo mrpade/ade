@@ -1,10 +1,33 @@
 const express = require('express');
 const router = express.Router();
-const { Question, QuestionOption, OptionImpact, DiseasesList, Symptom } = require('../models');
+const {
+  Question,
+  QuestionOption,
+  OptionImpact,
+  DiseasesList,
+  Symptom
+} = require('../models');
 const auth = require('../middleware/auth');
 const adminOnly = require('../middleware/admin');
 
 router.use(auth, adminOnly);
+
+// GET /admin/symptoms?page=1&perPage=20
+router.get('/symptoms', async (req, res) => {
+  try {
+    const page = parseInt(req.query.page, 10) || 1;
+    const perPage = parseInt(req.query.perPage, 10) || 20;
+    const list = await Symptom.findAll({
+      order: [['name', 'ASC']],
+      limit: perPage,
+      offset: (page - 1) * perPage
+    });
+    res.json(list);
+  } catch (err) {
+    console.error('[ADMIN][GET /symptoms]', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
 // GET /admin/questions?symptom=...
 router.get('/questions', async (req, res) => {
@@ -63,6 +86,53 @@ router.delete('/questions/:id', async (req, res) => {
     res.json({ message: 'deleted' });
   } catch (err) {
     console.error('[ADMIN][DELETE /questions/:id]', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// GET /admin/options/:symptomId
+router.get('/options/:symptomId', async (req, res) => {
+  try {
+    const { symptomId } = req.params;
+    const options = await QuestionOption.findAll({
+      include: [
+        {
+          model: Question,
+          where: { trigger_symptom_id: symptomId },
+          attributes: []
+        }
+      ],
+      order: [['option_label', 'ASC']]
+    });
+    const mapped = options.map(o => ({ id: o.id, text: o.option_label }));
+    res.json(mapped);
+  } catch (err) {
+    console.error('[ADMIN][GET /options/:symptomId]', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// GET /admin/scores/:symptomId
+router.get('/scores/:symptomId', async (req, res) => {
+  try {
+    const { symptomId } = req.params;
+    const impacts = await OptionImpact.findAll({
+      include: [
+        DiseasesList,
+        {
+          model: QuestionOption,
+          include: [{ model: Question, where: { trigger_symptom_id: symptomId } }]
+        }
+      ]
+    });
+    const result = impacts.map(i => ({
+      id: i.id,
+      disease_name: i.DiseasesList ? i.DiseasesList.Nom : null,
+      value: parseFloat(i.score_delta)
+    }));
+    res.json(result);
+  } catch (err) {
+    console.error('[ADMIN][GET /scores/:symptomId]', err);
     res.status(500).json({ error: 'Server error' });
   }
 });

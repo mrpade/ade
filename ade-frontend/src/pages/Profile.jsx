@@ -61,7 +61,7 @@ export default function Profile() {
           </div>
         </aside>
 
-        <main className="main-content">
+        <main className="profile-main-content">
           <header className="header">
             <div className="section-title">Tableau de bord</div>
             <div className="member-since">Membre depuis : {memberSince}</div>

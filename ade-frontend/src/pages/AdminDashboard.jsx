@@ -5,7 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 import {
   fetchSymptoms,
   fetchQuestions,
-  fetchResponses,
+  fetchOptions,
   fetchScores
 } from '../api/admin'; // your admin-specific API methods
 import './AdminDashboard.css';
@@ -17,13 +17,13 @@ export default function AdminDashboard() {
   const [section, setSection] = useState('symptoms');
   const [symptoms, setSymptoms] = useState([]);
   const [page, setPage] = useState(1);
-  const perPage = 9;
+  const perPage = 15;
 
   const [selectedSymptom, setSelectedSymptom] = useState(null);
-  const [viewType, setViewType] = useState('questions'); // 'questions' | 'responses' | 'scores'
+  const [viewType, setViewType] = useState('questions'); // 'questions' | 'options' | 'scores'
 
   const [questions, setQuestions] = useState([]);
-  const [responses, setResponses] = useState([]);
+  const [options, setOptions] = useState([]);
   const [scores, setScores] = useState([]);
 
   // --- Load Symptoms ---
@@ -44,9 +44,9 @@ export default function AdminDashboard() {
       if (viewType === 'questions') {
         const { data } = await fetchQuestions({ symptom: id });
         setQuestions(data);
-      } else if (viewType === 'responses') {
-        const { data } = await fetchResponses(id);
-        setResponses(data);
+      } else if (viewType === 'options') {
+        const { data } = await fetchOptions(id);
+        setOptions(data);
       } else if (viewType === 'scores') {
         const { data } = await fetchScores(id);
         setScores(data);
@@ -59,6 +59,7 @@ export default function AdminDashboard() {
   if (role !== 'admin') return <p>Access Denied</p>;
 
   return (
+    
     <div className="admin-dashboard">
       {/* Sidebar */}
       <aside className="sidebar">
@@ -113,16 +114,21 @@ export default function AdminDashboard() {
               <button
                 disabled={page === 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
+                className='pagination-button'
               >
                 Précédent
               </button>
-              <button onClick={() => setPage((p) => p + 1)}>Suivant</button>
+              <button 
+                onClick={() => setPage((p) => p + 1)}
+                className='pagination-button'
+              >
+                Suivant</button>
             </div>
 
             {/* Detail Cards */}
             <div className="detail-cards">
               {/* Top‐Left Card */}
-              <div className="card">
+              <div className="admin-dashboard-card">
                 <div className="card-header">
                   <h2>
                     {viewType.charAt(0).toUpperCase() + viewType.slice(1)}
@@ -132,7 +138,7 @@ export default function AdminDashboard() {
                     onChange={(e) => setViewType(e.target.value)}
                   >
                     <option value="questions">Questions</option>
-                    <option value="responses">Réponses</option>
+                    <option value="options">Options</option>
                     <option value="scores">Score</option>
                   </select>
                 </div>
@@ -151,16 +157,16 @@ export default function AdminDashboard() {
                     </>
                   )}
 
-                  {viewType === 'responses' && (
+                  {viewType === 'options' && (
                     <>
-                      {responses.length > 0 ? (
+                      {options.length > 0 ? (
                         <ul>
-                          {responses.map((r) => (
-                            <li key={r.id}>{r.text}</li>
+                          {options.map((o) => (
+                            <li key={o.id}>{o.text}</li>
                           ))}
                         </ul>
                       ) : (
-                        <button className="add-btn">Ajouter une réponse</button>
+                        <button className="add-btn">Ajouter une option</button>
                       )}
                     </>
                   )}
@@ -184,7 +190,7 @@ export default function AdminDashboard() {
               </div>
 
               {/* Bottom‐Right Card (example placeholder) */}
-              <div className="card">
+              <div className="admin-dashboard-card">
                 <h2>Maladies liées</h2>
                 {/* you can fill this similarly from your API */}
                 <p>…</p>
