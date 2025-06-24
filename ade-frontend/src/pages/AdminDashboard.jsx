@@ -8,6 +8,10 @@ import {
   fetchOptions,
   fetchScores,
   fetchRelatedDiseases,
+  fetchDiseases,
+  fetchDisease,
+  createDisease,
+  updateDisease,
   createQuestion,
   addOption,
   addImpact,
@@ -32,7 +36,25 @@ export default function AdminDashboard() {
   const [questions, setQuestions] = useState([]);
   const [options, setOptions] = useState([]);
   const [scores, setScores] = useState([]);
-  const [diseases, setDiseases] = useState([]);
+  const [relatedDiseases, setRelatedDiseases] = useState([]);
+
+  // Diseases section
+  const [diseaseList, setDiseaseList] = useState([]);
+  const [diseasePage, setDiseasePage] = useState(1);
+  const [selectedDisease, setSelectedDisease] = useState(null);
+  const [diseaseForm, setDiseaseForm] = useState({
+    Nom: '',
+    Symptomes: '',
+    Causes: '',
+    Transmission: '',
+    Traitements: '',
+    Gravite_sur_5: '',
+    Contagieuse: '',
+    Zone_geographique: '',
+    Notes: ''
+  });
+  const [diseaseSymptoms, setDiseaseSymptoms] = useState([]);
+  const [newSymptom, setNewSymptom] = useState('');
 
   const [showQuestionForm, setShowQuestionForm] = useState(false);
   const [newQuestion, setNewQuestion] = useState({ text: '', type: 'yes_no' });
@@ -80,10 +102,41 @@ export default function AdminDashboard() {
     if (!selectedSymptom) return;
     const loadDiseases = async () => {
       const { data } = await fetchRelatedDiseases(selectedSymptom.id);
-      setDiseases(data);
+      setRelatedDiseases(data);
     };
     loadDiseases();
   }, [selectedSymptom]);
+
+  // --- Load Diseases list ---
+  useEffect(() => {
+    if (section !== 'diseases') return;
+    const load = async () => {
+      const { data } = await fetchDiseases({ page: diseasePage, perPage: perPage });
+      setDiseaseList(data);
+    };
+    load();
+  }, [section, diseasePage]);
+
+  // --- Load selected disease details ---
+  useEffect(() => {
+    if (!selectedDisease) return;
+    const loadDetail = async () => {
+      const { data } = await fetchDisease(selectedDisease.id);
+      setDiseaseForm({
+        Nom: data.disease.Nom || '',
+        Symptomes: data.disease.Symptomes || '',
+        Causes: data.disease.Causes || '',
+        Transmission: data.disease.Transmission || '',
+        Traitements: data.disease.Traitements || '',
+        Gravite_sur_5: data.disease.Gravite_sur_5 || '',
+        Contagieuse: data.disease.Contagieuse || '',
+        Zone_geographique: data.disease.Zone_geographique || '',
+        Notes: data.disease.Notes || ''
+      });
+      setDiseaseSymptoms(data.symptoms);
+    };
+    loadDetail();
+  }, [selectedDisease]);
 
   const handleCreateQuestion = async e => {
     e.preventDefault();
@@ -175,6 +228,41 @@ export default function AdminDashboard() {
     } catch (err) {
       console.error('delete score error', err);
     }
+  };
+
+  const handleDiseaseFormChange = e => {
+    const { name, value } = e.target;
+    setDiseaseForm(f => ({ ...f, [name]: value }));
+  };
+
+  const handleSaveDisease = async e => {
+    e.preventDefault();
+    try {
+      if (selectedDisease && selectedDisease.id) {
+        const { data } = await updateDisease(selectedDisease.id, {
+          ...diseaseForm,
+          symptoms: diseaseSymptoms.map(s => s.name)
+        });
+        setSelectedDisease(data.disease);
+        setDiseaseSymptoms(data.symptoms);
+      } else {
+        await createDisease({ ...diseaseForm, symptoms: diseaseSymptoms.map(s => s.name) });
+        setDiseasePage(1);
+      }
+    } catch (err) {
+      console.error('save disease error', err);
+    }
+  };
+
+  const handleAddSymptomToDisease = e => {
+    e.preventDefault();
+    if (!newSymptom.trim()) return;
+    setDiseaseSymptoms(s => [...s, { id: null, name: newSymptom.trim() }]);
+    setNewSymptom('');
+  };
+
+  const handleRemoveSymptom = name => {
+    setDiseaseSymptoms(s => s.filter(sym => sym.name !== name));
   };
 
   if (role !== 'admin') return <p>Access Denied</p>;
@@ -408,7 +496,7 @@ export default function AdminDashboard() {
                             required
                           >
                             <option value="">-- Maladie --</option>
-                            {diseases.map(d => (
+                            {relatedDiseases.map(d => (
                               <option key={d.id} value={d.id}>{d.name}</option>
                             ))}
                           </select>
@@ -433,17 +521,161 @@ export default function AdminDashboard() {
               {/* Bottom‐Right Card */}
               <div className="admin-dashboard-card">
                 <h2>Maladies liées</h2>
-                {diseases.length === 0 ? (
+                {relatedDiseases.length === 0 ? (
                   <p>Aucune maladie</p>
                 ) : (
                   <ul>
-                    {diseases.map(d => (
+                    {relatedDiseases.map(d => (
                       <li key={d.id}>{d.name}</li>
                     ))}
                   </ul>
                 )}
               </div>
             </div>
+          </>
+        )}
+
+        {section === 'diseases' && (
+          <>
+            <div className="symptom-grid">
+              {diseaseList.map(d => (
+                <button
+                  key={d.id}
+                  className={
+                    selectedDisease?.id === d.id
+                      ? 'symptom-btn selected'
+                      : 'symptom-btn'
+                  }
+                  onClick={() => {
+                    setSelectedDisease(d);
+                  }}
+                >
+                  {d.Nom}
+                </button>
+              ))}
+              <button
+                className="add-btn"
+                onClick={() => {
+                  setSelectedDisease({});
+                  setDiseaseForm({
+                    Nom: '',
+                    Symptomes: '',
+                    Causes: '',
+                    Transmission: '',
+                    Traitements: '',
+                    Gravite_sur_5: '',
+                    Contagieuse: '',
+                    Zone_geographique: '',
+                    Notes: ''
+                  });
+                  setDiseaseSymptoms([]);
+                }}
+              >
+                Nouvelle maladie
+              </button>
+            </div>
+            <div className="pagination">
+              <button
+                disabled={diseasePage === 1}
+                onClick={() => setDiseasePage(p => Math.max(1, p - 1))}
+                className="pagination-button"
+              >
+                Précédent
+              </button>
+              <button
+                onClick={() => setDiseasePage(p => p + 1)}
+                className="pagination-button"
+              >
+                Suivant
+              </button>
+            </div>
+            {selectedDisease && (
+              <div className="detail-cards">
+                <div className="admin-dashboard-card">
+                  <h2>{selectedDisease.id ? 'Éditer' : 'Nouvelle'} maladie</h2>
+                  <form onSubmit={handleSaveDisease} className="admin-form">
+                    <input
+                      name="Nom"
+                      value={diseaseForm.Nom}
+                      onChange={handleDiseaseFormChange}
+                      placeholder="Nom"
+                      required
+                    />
+                    <textarea
+                      name="Causes"
+                      value={diseaseForm.Causes}
+                      onChange={handleDiseaseFormChange}
+                      placeholder="Causes"
+                    />
+                    <textarea
+                      name="Transmission"
+                      value={diseaseForm.Transmission}
+                      onChange={handleDiseaseFormChange}
+                      placeholder="Transmission"
+                    />
+                    <textarea
+                      name="Traitements"
+                      value={diseaseForm.Traitements}
+                      onChange={handleDiseaseFormChange}
+                      placeholder="Traitements"
+                    />
+                    <input
+                      name="Gravite_sur_5"
+                      value={diseaseForm.Gravite_sur_5}
+                      onChange={handleDiseaseFormChange}
+                      placeholder="Gravité sur 5"
+                    />
+                    <input
+                      name="Contagieuse"
+                      value={diseaseForm.Contagieuse}
+                      onChange={handleDiseaseFormChange}
+                      placeholder="Contagieuse"
+                    />
+                    <textarea
+                      name="Zone_geographique"
+                      value={diseaseForm.Zone_geographique}
+                      onChange={handleDiseaseFormChange}
+                      placeholder="Zone géographique"
+                    />
+                    <textarea
+                      name="Notes"
+                      value={diseaseForm.Notes}
+                      onChange={handleDiseaseFormChange}
+                      placeholder="Notes"
+                    />
+                    <button type="submit" className="add-btn">Enregistrer</button>
+                  </form>
+                </div>
+                <div className="admin-dashboard-card">
+                  <h2>Symptômes liés</h2>
+                  {diseaseSymptoms.length === 0 ? (
+                    <p>Aucun symptôme</p>
+                  ) : (
+                    <ul>
+                      {diseaseSymptoms.map(s => (
+                        <li key={s.name}>
+                          {s.name}
+                          <button
+                            className="delete-btn"
+                            onClick={() => handleRemoveSymptom(s.name)}
+                          >
+                            Supprimer
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <form onSubmit={handleAddSymptomToDisease} className="admin-form">
+                    <input
+                      value={newSymptom}
+                      onChange={e => setNewSymptom(e.target.value)}
+                      placeholder="Nouveau symptôme"
+                    />
+                    <button type="submit" className="add-btn">Ajouter</button>
+                  </form>
+                </div>
+              </div>
+            )}
           </>
         )}
 

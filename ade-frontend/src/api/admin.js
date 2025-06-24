@@ -22,3 +22,8 @@ export const fetchScores = symptomId => api.get(`/admin/scores/${symptomId}`);
 
 export const fetchRelatedDiseases = symptomId =>
   api.get(`/admin/symptoms/${symptomId}/diseases`);
+
+export const fetchDiseases = params => api.get('/admin/diseases', { params });
+export const fetchDisease = id => api.get(`/admin/diseases/${id}`);
+export const createDisease = data => api.post('/admin/diseases', data);
+export const updateDisease = (id, data) => api.put(`/admin/diseases/${id}`, data);
