@@ -1,6 +1,7 @@
 // src/components/AdminDashboard.jsx
 
 import React, { useContext, useEffect, useState } from 'react';
+import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import {
   fetchSymptoms,
@@ -55,6 +56,8 @@ export default function AdminDashboard() {
   });
   const [diseaseSymptoms, setDiseaseSymptoms] = useState([]);
   const [newSymptom, setNewSymptom] = useState('');
+  const [symptomSuggestions, setSymptomSuggestions] = useState([]);
+  const [showSymSuggestions, setShowSymSuggestions] = useState(false);
 
   const [showQuestionForm, setShowQuestionForm] = useState(false);
   const [newQuestion, setNewQuestion] = useState({ text: '', type: 'yes_no' });
@@ -259,11 +262,32 @@ export default function AdminDashboard() {
     if (!newSymptom.trim()) return;
     setDiseaseSymptoms(s => [...s, { id: null, name: newSymptom.trim() }]);
     setNewSymptom('');
+    setShowSymSuggestions(false);
   };
 
   const handleRemoveSymptom = name => {
     setDiseaseSymptoms(s => s.filter(sym => sym.name !== name));
   };
+
+  // Fetch symptom suggestions when user types
+  useEffect(() => {
+    if (!newSymptom.trim()) {
+      setSymptomSuggestions([]);
+      return;
+    }
+    const timeout = setTimeout(async () => {
+      try {
+        const { data } = await api.get('/symptomes', {
+          params: { q: newSymptom.trim(), full: true }
+        });
+        setSymptomSuggestions(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('symptom suggestions error', err);
+        setSymptomSuggestions([]);
+      }
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [newSymptom]);
 
   if (role !== 'admin') return <p>Access Denied</p>;
 
@@ -665,12 +689,25 @@ export default function AdminDashboard() {
                       ))}
                     </ul>
                   )}
-                  <form onSubmit={handleAddSymptomToDisease} className="admin-form">
-                    <input
-                      value={newSymptom}
-                      onChange={e => setNewSymptom(e.target.value)}
-                      placeholder="Nouveau symptôme"
-                    />
+                  <form onSubmit={handleAddSymptomToDisease} className="admin-form" autoComplete="off">
+                    <div style={{ position: 'relative', width: '100%' }}>
+                      <input
+                        value={newSymptom}
+                        onChange={e => { setNewSymptom(e.target.value); setShowSymSuggestions(true); }}
+                        onFocus={() => setShowSymSuggestions(true)}
+                        placeholder="Nouveau symptôme"
+                        className="search-input"
+                      />
+                      {showSymSuggestions && symptomSuggestions.length > 0 && (
+                        <ul className="suggestions-list">
+                          {symptomSuggestions.map(s => (
+                            <li key={s.id || s.name} onMouseDown={() => { setNewSymptom(s.name); setShowSymSuggestions(false); }}>
+                              {s.name}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
                     <button type="submit" className="add-btn">Ajouter</button>
                   </form>
                 </div>
