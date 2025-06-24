@@ -76,8 +76,19 @@
   background: #fff;
   border: 1px solid #eee;
   border-radius: 8px;
-  padding: 1rem;
+  padding: 5px 20px;
   margin-bottom: 1rem;
+  
+}
+#maladies-liee-card{
+  width: fit-content;
+
+  li {
+  list-style: none;
+  }
+}
+#questions-card{
+  width: 75%;
 }
 
 .card-header {
@@ -93,4 +104,43 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
+}
+.admin-dashboard-card li{
+  margin-block-end: 5px;
+  margin-inline-start: 10px;
+}
+
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.delete-btn {
+  margin-left: 0.5rem;
+  background: transparent;
+  border: none;
+  color: red;
+  cursor: pointer;
+}
+
+.symptom-grid .add-btn {
+  margin-inline-end: 0;
+}
+
+#disease-info-card {
+  width: 60%;
+
+  textarea {
+    padding: 5px 10px;
+    border-radius: 5px;
+    background: rgba(22, 102, 53, 0.1);
+    color: var(--tertiary-color);
+    font-family: "Poppins", Arial, sans-serif;
+  }
+}
+
+#disease-symptoms-card {
+  width: 38%;
 }

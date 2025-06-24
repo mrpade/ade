@@ -29,13 +29,38 @@ router.get('/symptoms', async (req, res) => {
   }
 });
 
+// GET /admin/symptoms/:id/diseases
+router.get('/symptoms/:id/diseases', async (req, res) => {
+  try {
+    const list = await DiseasesList.findAll({
+      include: [{
+        model: Symptom,
+        through: { attributes: [] },
+        where: { id: req.params.id }
+      }],
+      order: [['Nom', 'ASC']]
+    });
+    const mapped = list.map(d => ({ id: d.id, name: d.Nom }));
+    res.json(mapped);
+  } catch (err) {
+    console.error('[ADMIN][GET /symptoms/:id/diseases]', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // GET /admin/questions?symptom=...
 router.get('/questions', async (req, res) => {
   try {
     const where = {};
     if (req.query.symptom) {
-      const sym = await Symptom.findOne({ where: { name: req.query.symptom } });
-      if (sym) where.trigger_symptom_id = sym.id; else where.trigger_symptom_id = -1; // no results
+      // Allow using either the symptom name or its numeric id
+      if (/^\d+$/.test(req.query.symptom)) {
+        // received an id directly
+        where.trigger_symptom_id = parseInt(req.query.symptom, 10);
+      } else {
+        const sym = await Symptom.findOne({ where: { name: req.query.symptom } });
+        if (sym) where.trigger_symptom_id = sym.id; else where.trigger_symptom_id = -1; // no results
+      }
     }
     const questions = await Question.findAll({
       where,
@@ -99,12 +124,16 @@ router.get('/options/:symptomId', async (req, res) => {
         {
           model: Question,
           where: { trigger_symptom_id: symptomId },
-          attributes: []
+          attributes: ['question_text']
         }
       ],
       order: [['option_label', 'ASC']]
     });
-    const mapped = options.map(o => ({ id: o.id, text: o.option_label }));
+    const mapped = options.map(o => ({
+      id: o.id,
+      text: o.option_label,
+      question_text: o.Question ? o.Question.question_text : null
+    }));
     res.json(mapped);
   } catch (err) {
     console.error('[ADMIN][GET /options/:symptomId]', err);
@@ -128,6 +157,7 @@ router.get('/scores/:symptomId', async (req, res) => {
     const result = impacts.map(i => ({
       id: i.id,
       disease_name: i.DiseasesList ? i.DiseasesList.Nom : null,
+      option_text: i.QuestionOption ? i.QuestionOption.option_label : null,
       value: parseFloat(i.score_delta)
     }));
     res.json(result);
@@ -203,6 +233,85 @@ router.delete('/impacts/:id', async (req, res) => {
     res.json({ message: 'deleted' });
   } catch (err) {
     console.error('[ADMIN][DELETE impact]', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---- Diseases CRUD ----
+// GET /admin/diseases?page=1&perPage=20
+router.get('/diseases', async (req, res) => {
+  try {
+    const page = parseInt(req.query.page, 10) || 1;
+    const perPage = parseInt(req.query.perPage, 10) || 20;
+    const list = await DiseasesList.findAll({
+      order: [['Nom', 'ASC']],
+      limit: perPage,
+      offset: (page - 1) * perPage
+    });
+    res.json(list);
+  } catch (err) {
+    console.error('[ADMIN][GET /diseases]', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// GET /admin/diseases/:id
+router.get('/diseases/:id', async (req, res) => {
+  try {
+    const disease = await DiseasesList.findByPk(req.params.id, {
+      include: [{ model: Symptom, through: { attributes: [] } }]
+    });
+    if (!disease) return res.status(404).json({ error: 'Not found' });
+    const symptoms = disease.Symptoms.map(s => ({ id: s.id, name: s.name }));
+    res.json({ disease, symptoms });
+  } catch (err) {
+    console.error('[ADMIN][GET /diseases/:id]', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// POST /admin/diseases
+router.post('/diseases', async (req, res) => {
+  try {
+    const { symptoms = [], ...data } = req.body;
+    const d = await DiseasesList.create(data);
+    if (Array.isArray(symptoms) && symptoms.length) {
+      const symInstances = [];
+      for (const name of symptoms) {
+        const [sym] = await Symptom.findOrCreate({ where: { name } });
+        symInstances.push(sym);
+      }
+      await d.setSymptoms(symInstances);
+    }
+    res.status(201).json(d);
+  } catch (err) {
+    console.error('[ADMIN][POST /diseases]', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// PUT /admin/diseases/:id
+router.put('/diseases/:id', async (req, res) => {
+  try {
+    const { symptoms = null, ...data } = req.body;
+    const d = await DiseasesList.findByPk(req.params.id);
+    if (!d) return res.status(404).json({ error: 'Not found' });
+    await d.update(data);
+    if (Array.isArray(symptoms)) {
+      const symInstances = [];
+      for (const name of symptoms) {
+        const [sym] = await Symptom.findOrCreate({ where: { name } });
+        symInstances.push(sym);
+      }
+      await d.setSymptoms(symInstances);
+    }
+    const updated = await DiseasesList.findByPk(req.params.id, {
+      include: [{ model: Symptom, through: { attributes: [] } }]
+    });
+    const sym = updated.Symptoms.map(s => ({ id: s.id, name: s.name }));
+    res.json({ disease: updated, symptoms: sym });
+  } catch (err) {
+    console.error('[ADMIN][PUT /diseases/:id]', err);
     res.status(500).json({ error: 'Server error' });
   }
 });
