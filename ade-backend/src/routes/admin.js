@@ -53,8 +53,14 @@ router.get('/questions', async (req, res) => {
   try {
     const where = {};
     if (req.query.symptom) {
-      const sym = await Symptom.findOne({ where: { name: req.query.symptom } });
-      if (sym) where.trigger_symptom_id = sym.id; else where.trigger_symptom_id = -1; // no results
+      // Allow using either the symptom name or its numeric id
+      if (/^\d+$/.test(req.query.symptom)) {
+        // received an id directly
+        where.trigger_symptom_id = parseInt(req.query.symptom, 10);
+      } else {
+        const sym = await Symptom.findOne({ where: { name: req.query.symptom } });
+        if (sym) where.trigger_symptom_id = sym.id; else where.trigger_symptom_id = -1; // no results
+      }
     }
     const questions = await Question.findAll({
       where,
