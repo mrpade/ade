@@ -10,7 +10,10 @@ import {
   fetchRelatedDiseases,
   createQuestion,
   addOption,
-  addImpact
+  addImpact,
+  deleteQuestion,
+  deleteOption,
+  deleteImpact
 } from '../api/admin'; // your admin-specific API methods
 import './AdminDashboard.css';
 
@@ -141,6 +144,39 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDeleteQuestion = async id => {
+    if (!selectedSymptom) return;
+    try {
+      await deleteQuestion(id);
+      const { data } = await fetchQuestions({ symptom: selectedSymptom.id });
+      setQuestions(data);
+    } catch (err) {
+      console.error('delete question error', err);
+    }
+  };
+
+  const handleDeleteOption = async id => {
+    if (!selectedSymptom) return;
+    try {
+      await deleteOption(id);
+      const { data } = await fetchOptions(selectedSymptom.id);
+      setOptions(data);
+    } catch (err) {
+      console.error('delete option error', err);
+    }
+  };
+
+  const handleDeleteScore = async id => {
+    if (!selectedSymptom) return;
+    try {
+      await deleteImpact(id);
+      const { data } = await fetchScores(selectedSymptom.id);
+      setScores(data);
+    } catch (err) {
+      console.error('delete score error', err);
+    }
+  };
+
   if (role !== 'admin') return <p>Access Denied</p>;
 
   return (
@@ -233,7 +269,15 @@ export default function AdminDashboard() {
                       {questions.length > 0 && (
                         <ol>
                           {questions.map((q) => (
-                            <li key={q.id}>{q.question_text}</li>
+                            <li key={q.id}>
+                              {q.question_text}
+                              <button
+                                className="delete-btn"
+                                onClick={() => handleDeleteQuestion(q.id)}
+                              >
+                                Supprimer
+                              </button>
+                            </li>
                           ))}
                         </ol>
                       )}
@@ -271,6 +315,12 @@ export default function AdminDashboard() {
                           {options.map((o) => (
                             <li key={o.id}>
                               <strong>{o.question_text}</strong> : {o.text}
+                              <button
+                                className="delete-btn"
+                                onClick={() => handleDeleteOption(o.id)}
+                              >
+                                Supprimer
+                              </button>
                             </li>
                           ))}
                         </ul>
@@ -328,6 +378,12 @@ export default function AdminDashboard() {
                           {scores.map((s) => (
                             <li key={s.id}>
                               {s.disease_name} - {s.option_text} : {s.value}
+                              <button
+                                className="delete-btn"
+                                onClick={() => handleDeleteScore(s.id)}
+                              >
+                                Supprimer
+                              </button>
                             </li>
                           ))}
                         </ul>

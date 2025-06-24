@@ -101,3 +101,11 @@
   gap: 0.5rem;
   margin-top: 0.5rem;
 }
+
+.delete-btn {
+  margin-left: 0.5rem;
+  background: transparent;
+  border: none;
+  color: red;
+  cursor: pointer;
+}
