@@ -124,12 +124,16 @@ router.get('/options/:symptomId', async (req, res) => {
         {
           model: Question,
           where: { trigger_symptom_id: symptomId },
-          attributes: []
+          attributes: ['question_text']
         }
       ],
       order: [['option_label', 'ASC']]
     });
-    const mapped = options.map(o => ({ id: o.id, text: o.option_label }));
+    const mapped = options.map(o => ({
+      id: o.id,
+      text: o.option_label,
+      question_text: o.Question ? o.Question.question_text : null
+    }));
     res.json(mapped);
   } catch (err) {
     console.error('[ADMIN][GET /options/:symptomId]', err);
@@ -153,6 +157,7 @@ router.get('/scores/:symptomId', async (req, res) => {
     const result = impacts.map(i => ({
       id: i.id,
       disease_name: i.DiseasesList ? i.DiseasesList.Nom : null,
+      option_text: i.QuestionOption ? i.QuestionOption.option_label : null,
       value: parseFloat(i.score_delta)
     }));
     res.json(result);

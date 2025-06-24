@@ -269,7 +269,9 @@ export default function AdminDashboard() {
                       {options.length > 0 && (
                         <ul>
                           {options.map((o) => (
-                            <li key={o.id}>{o.text}</li>
+                            <li key={o.id}>
+                              <strong>{o.question_text}</strong> : {o.text}
+                            </li>
                           ))}
                         </ul>
                       )}
@@ -325,7 +327,7 @@ export default function AdminDashboard() {
                         <ul>
                           {scores.map((s) => (
                             <li key={s.id}>
-                              {s.disease_name} : {s.value}
+                              {s.disease_name} - {s.option_text} : {s.value}
                             </li>
                           ))}
                         </ul>
@@ -339,7 +341,9 @@ export default function AdminDashboard() {
                           >
                             <option value="">-- Option --</option>
                             {options.map(o => (
-                              <option key={o.id} value={o.id}>{o.text}</option>
+                              <option key={o.id} value={o.id}>
+                                {o.question_text ? `${o.question_text} - ${o.text}` : o.text}
+                              </option>
                             ))}
                           </select>
                           <select
