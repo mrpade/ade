@@ -28,6 +28,8 @@ export default function Login() {
     try {
       const { data } = await api.post('/auth/login', { email, password });
       login(data.token, data.role);
+      setEmail('');
+      setPassword('');
       if (data.role === 'admin')         navigate('/admin');
         else if (data.role === 'doctor')      navigate('/doctor');
         else if (data.role === 'pharmacy')    navigate('/pharmacy');
@@ -49,6 +51,7 @@ export default function Login() {
     try {
       const { data } = await api.post('/auth/forgot', { email });
       setInfo(`Email envoyé ! Ouvre ce lien de preview : ${data.previewUrl}`);
+      setEmail('');
       setLoading(false);
     } catch (err) {
       setError(err.response?.data?.error || 'Erreur lors de la demande');
@@ -62,12 +65,13 @@ export default function Login() {
       {step === 'login' ? (
         <>
           <h1>Connexion</h1>
-          <form onSubmit={handleLogin} className="auth-form">
+          <form onSubmit={handleLogin} className="auth-form" autoComplete="off">
             <input
               type="email"
               placeholder="Email"
               value={email}
               onChange={e => setEmail(e.target.value)}
+              autoComplete="off"
               required
             />
             <input
@@ -75,6 +79,7 @@ export default function Login() {
               placeholder="Mot de passe"
               value={password}
               onChange={e => setPassword(e.target.value)}
+              autoComplete="off"
               required
             />
             {!loading && <button type="submit">Se connecter</button>}
@@ -90,12 +95,13 @@ export default function Login() {
       ) : (
         <>
           <h1>Mot de passe oublié</h1>
-          <form onSubmit={handleForgot} className="auth-form">
+          <form onSubmit={handleForgot} className="auth-form" autoComplete="off">
             <input
               type="email"
               placeholder="Votre email"
               value={email}
               onChange={e => setEmail(e.target.value)}
+              autoComplete="off"
               required
             />
             {!loading && <button type="submit">Envoyer le lien</button>}

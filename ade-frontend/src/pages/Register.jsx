@@ -6,33 +6,35 @@ import { AuthContext } from "../context/AuthContext";
 import PasswordStrengthMeter from "../components/PasswordStrengthMeter";
 import MapPicker from "../components/MapPicker";
 
+const initialForm = {
+  email: "",
+  password: "",
+  confirmPassword: "",
+  role: "patient",
+  first_name: "",
+  last_name: "",
+  birthdate: "",
+  // doctor
+  speciality: "",
+  onmc: "",
+  workplace: "",
+  bio: "",
+  // pharmacy
+  name: "",
+  address: "",
+  latitude: "",
+  longitude: "",
+  // courier
+  vehicle_type: "motorbike",
+  plate_number: "",
+  driver_license: "",
+};
+
 export default function Register() {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
   const [mapPos, setMapPos] = useState([48.8566, 2.3522]); // default Paris
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-    confirmPassword: "",
-    role: "patient",
-    first_name: "",
-    last_name: "",
-    birthdate: "",
-    // doctor
-    speciality: "",
-    onmc: "",
-    workplace: "",
-    bio: "",
-    // pharmacy
-    name: "",
-    address: "",
-    latitude: "",
-    longitude: "",
-    // courier
-    vehicle_type: "motorbike",
-    plate_number: "",
-    driver_license: "",
-  });
+  const [form, setForm] = useState(initialForm);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -70,6 +72,7 @@ export default function Register() {
 
       // Si l'API renvoie un token, on connecte directement
       if (data.token) {
+        setForm(initialForm);
         login(data.token, data.role);
         if (data.role === 'doctor')      navigate('/doctor');
           else if (data.role === 'pharmacy') navigate('/pharmacy');
@@ -94,7 +97,7 @@ export default function Register() {
         </aside>
         <section className="register-page__form">
           <h1>Inscription</h1>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} autoComplete="off">
             <select
               name="role"
               value={form.role}
@@ -111,6 +114,7 @@ export default function Register() {
               placeholder="Email"
               value={form.email}
               onChange={handleChange}
+              autoComplete="off"
               required
             />
             <input
@@ -119,6 +123,7 @@ export default function Register() {
               placeholder="Nouveau mot de passe"
               value={form.password}
               onChange={handleChange}
+              autoComplete="new-password"
               required
             />
             <input
@@ -127,6 +132,7 @@ export default function Register() {
             placeholder="Confirmer mot de passe"
             value={form.confirmPassword}
             onChange={handleChange}
+            autoComplete="new-password"
             required
             />
             <PasswordStrengthMeter password={form.password} />
