@@ -14,8 +14,11 @@ import {
   createDisease,
   updateDisease,
   createQuestion,
+  updateQuestion,
   addOption,
+  updateOption,
   addImpact,
+  updateImpact,
   deleteQuestion,
   deleteOption,
   deleteImpact
@@ -68,6 +71,9 @@ export default function AdminDashboard() {
   const [showScoreForm, setShowScoreForm] = useState(false);
   const [newScore, setNewScore] = useState({ optionId: '', diseaseId: '', value: '' });
 
+  const [editQuestion, setEditQuestion] = useState(null);
+  const [editQuestionData, setEditQuestionData] = useState({ text: '', type: 'yes_no' });
+
   // --- Load Symptoms ---
   useEffect(() => {
     if (role !== 'admin') return;
@@ -108,6 +114,7 @@ export default function AdminDashboard() {
       setRelatedDiseases(data);
     };
     loadDiseases();
+    setEditQuestion(null);
   }, [selectedSymptom]);
 
   // --- Load Diseases list ---
@@ -230,6 +237,83 @@ export default function AdminDashboard() {
       setScores(data);
     } catch (err) {
       console.error('delete score error', err);
+    }
+  };
+
+  const handleEditQuestionClick = q => {
+    setEditQuestion(JSON.parse(JSON.stringify(q)));
+    setEditQuestionData({ text: q.question_text, type: q.question_type });
+  };
+
+  const handleUpdateQuestion = async e => {
+    e.preventDefault();
+    try {
+      await updateQuestion(editQuestion.id, {
+        question_text: editQuestionData.text,
+        question_type: editQuestionData.type
+      });
+      const { data } = await fetchQuestions({ symptom: selectedSymptom.id });
+      setQuestions(data);
+      const updated = data.find(q => q.id === editQuestion.id);
+      setEditQuestion(updated);
+    } catch (err) {
+      console.error('update question error', err);
+    }
+  };
+
+  const handleOptionLabelChange = (id, val) => {
+    setEditQuestion(q => ({
+      ...q,
+      options: q.options.map(o =>
+        o.id === id ? { ...o, option_label: val } : o
+      )
+    }));
+  };
+
+  const handleSaveOption = async id => {
+    const opt = editQuestion.options.find(o => o.id === id);
+    if (!opt) return;
+    try {
+      await updateOption(id, { option_label: opt.option_label });
+      const { data } = await fetchQuestions({ symptom: selectedSymptom.id });
+      setQuestions(data);
+      const updated = data.find(q => q.id === editQuestion.id);
+      setEditQuestion(updated);
+    } catch (err) {
+      console.error('update option error', err);
+    }
+  };
+
+  const handleImpactChange = (id, val) => {
+    setEditQuestion(q => ({
+      ...q,
+      options: q.options.map(o => ({
+        ...o,
+        impacts: o.impacts.map(im =>
+          im.id === id ? { ...im, score_delta: val } : im
+        )
+      }))
+    }));
+  };
+
+  const handleSaveImpact = async id => {
+    let impact;
+    for (const o of editQuestion.options) {
+      impact = o.impacts.find(im => im.id === id);
+      if (impact) break;
+    }
+    if (!impact) return;
+    try {
+      await updateImpact(id, {
+        disease_id: impact.disease_id,
+        score_delta: impact.score_delta
+      });
+      const { data } = await fetchQuestions({ symptom: selectedSymptom.id });
+      setQuestions(data);
+      const updated = data.find(q => q.id === editQuestion.id);
+      setEditQuestion(updated);
+    } catch (err) {
+      console.error('update impact error', err);
     }
   };
 
@@ -388,6 +472,12 @@ export default function AdminDashboard() {
                                 onClick={() => handleDeleteQuestion(q.id)}
                               >
                                 Supprimer
+                              </button>
+                              <button
+                                className="edit-btn"
+                                onClick={() => handleEditQuestionClick(q)}
+                              >
+                                Éditer
                               </button>
                             </li>
                           ))}
@@ -556,6 +646,62 @@ export default function AdminDashboard() {
                 )}
               </div>
             </div>
+
+            {editQuestion && (
+              <div className="edit-container">
+                <div className="admin-dashboard-card">
+                  <h2>Éditer la question</h2>
+                  <form onSubmit={handleUpdateQuestion} className="admin-form">
+                    <input
+                      value={editQuestionData.text}
+                      onChange={e => setEditQuestionData(d => ({ ...d, text: e.target.value }))}
+                      placeholder="Question"
+                      required
+                    />
+                    <select
+                      value={editQuestionData.type}
+                      onChange={e => setEditQuestionData(d => ({ ...d, type: e.target.value }))}
+                    >
+                      <option value="yes_no">Oui/Non</option>
+                      <option value="multiple_choice">Choix multiple</option>
+                      <option value="number">Nombre</option>
+                      <option value="scale">Échelle</option>
+                    </select>
+                    <button type="submit" className="add-btn">Sauvegarder</button>
+                    <button type="button" className="delete-btn" onClick={() => setEditQuestion(null)}>
+                      Fermer
+                    </button>
+                  </form>
+
+                  <h3>Options</h3>
+                  {editQuestion.options && editQuestion.options.map(o => (
+                    <div key={o.id} className="edit-option">
+                      <input
+                        value={o.option_label}
+                        onChange={e => handleOptionLabelChange(o.id, e.target.value)}
+                      />
+                      <button type="button" className="edit-btn" onClick={() => handleSaveOption(o.id)}>
+                        Enregistrer
+                      </button>
+                      {o.impacts && o.impacts.map(im => (
+                        <div key={im.id} className="edit-score">
+                          <span>{im.DiseasesList ? im.DiseasesList.Nom : ''}</span>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={im.score_delta}
+                            onChange={e => handleImpactChange(im.id, e.target.value)}
+                          />
+                          <button type="button" className="edit-btn" onClick={() => handleSaveImpact(im.id)}>
+                            Enregistrer
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </>
         )}
 

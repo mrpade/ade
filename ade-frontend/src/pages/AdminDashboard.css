@@ -144,3 +144,23 @@
 #disease-symptoms-card {
   width: 38%;
 }
+
+.edit-btn {
+  margin-left: 0.5rem;
+  background: var(--primary-color);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.edit-container {
+  width: 100%;
+}
+
+.edit-score {
+  margin-left: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
