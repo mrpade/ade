@@ -13,7 +13,7 @@ export default function Home() {
       <section className="hero">
         <h1><strong>Parce que <span className="highlight">votre santé mérite mieux</span> qu’une attente de 2 heures</strong></h1>
         <p>
-          ADE vous permet d’obtenir un diagnostic, de consulter un médecin à distance et de commander vos médicaments en toute simplicité,
+          Faites une auto-évaluation de vos symptômes, demandez une vérification à un médecin à distance et commandez vos médicaments en toute simplicité,
           sans quitter votre domicile.
         </p>
       </section>

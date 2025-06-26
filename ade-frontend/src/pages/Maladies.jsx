@@ -5,6 +5,8 @@ import debounce from 'lodash.debounce';
 import api from '../services/api';
 import { getAvailableDoctors } from '../api/doctors';
 import { createCheck } from '../api/checks';
+import QuestionCard from '../components/QuestionCard';
+import { interactiveSearch } from '../api/diseases';
 import { AuthContext } from '../context/AuthContext';
 /*import SymptomSearch from '../components/SymptomSearch';*/
 
@@ -17,6 +19,10 @@ export default function Maladies() {
   const [doctors, setDoctors]           = useState([]);
   const [selecting, setSelecting]       = useState(null);
   const [selectedDoctor, setSelectedDoctor] = useState('');
+  const [questions, setQuestions]       = useState([]);
+  const [qIndex, setQIndex]             = useState(0);
+  const [responses, setResponses]       = useState([]);
+  const [currentSymptoms, setCurrentSymptoms] = useState([]);
 
   const navigate = useNavigate();
   const { token } = useContext(AuthContext);
@@ -94,11 +100,21 @@ export default function Maladies() {
 
   const handleSearch = async e => {
     e.preventDefault();
+    const symptoms = query
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean);
     try {
-      const { data } = await api.get('/maladies', {
-        params: { symptomes: query }
-      });
-      setResults(data);
+      const { data } = await interactiveSearch(symptoms);
+      setCurrentSymptoms(symptoms);
+      if (data.questions && data.questions.length) {
+        setQuestions(data.questions);
+        setQIndex(0);
+        setResponses([]);
+        setResults([]);
+      } else {
+        setResults(data.diseases.slice(0, 3));
+      }
       setShowSug(false);
     } catch (err) {
       console.error(err);
@@ -134,6 +150,29 @@ export default function Maladies() {
     }
   };
 
+  const handleAnswer = async optionId => {
+    const question = questions[qIndex];
+    const newResponses = [
+      ...responses,
+      { questionId: question.id, optionId }
+    ];
+    if (qIndex + 1 < questions.length) {
+      setResponses(newResponses);
+      setQIndex(qIndex + 1);
+    } else {
+      try {
+        const { data } = await interactiveSearch(currentSymptoms, newResponses);
+        setResults(data.diseases.slice(0, 3));
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setQuestions([]);
+        setResponses([]);
+        setQIndex(0);
+      }
+    }
+  };
+
   return (
     <div className="container">
       <h1>Recherche de maladies</h1>
@@ -166,7 +205,9 @@ export default function Maladies() {
         <button type="submit">Rechercher</button>
       </form>
 
-      {results.length === 0 ? (
+      {questions.length > 0 ? (
+        <QuestionCard question={questions[qIndex]} onAnswer={handleAnswer} />
+      ) : results.length === 0 ? (
         <p>Aucun résultat.</p>
       ) : (
         <div className="card-grid">

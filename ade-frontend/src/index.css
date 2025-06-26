@@ -2,10 +2,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
 :root {
-  --primary-color: #166635;
+  --primary-color: #307f34;
   --secondary-color: #fff;
   --tertiary-color: #121310;
-  --accent-color: #d8125a;
+  --accent-color: #e83781;
   font-family: "Poppins", Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -54,16 +54,18 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 button{
   margin: auto;
-  padding: 0.75rem 1rem;
+  padding: 0.7rem 1rem;
   background-color: #0a7f3b;
   color: #fff;
   text-decoration: none;
-  border: none;
-  border-radius: 5px;
+  border-radius: 2px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: background-color .5s ease;
+}
+button:hover {
+  background-color: var(--accent-color);
 }
 button:focus-visible,
 a:focus-visible {
@@ -148,6 +150,7 @@ a:focus-visible {
 .card p {
   margin-bottom: 0.25rem;
 }
+
 
 /*page inscription*/
 /* Conteneur en 2 colonnes */
