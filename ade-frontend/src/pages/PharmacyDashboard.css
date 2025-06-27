@@ -138,16 +138,14 @@
 }
 
 .btn {
-  flex: 1;
-  padding: 8px 10px;
   border: none;
   border-radius: 4px;
   font-weight: bold;
   cursor: pointer;
 }
 
-.btn.green { background-color: #007f5f; color: white; }
-.btn.pink { background-color: #e91e63; color: white; }
+.btn.green { background-color: var(--primary-color); color: white; }
+.btn.pink { background-color: var(--accent-color); color: white; }
 
 .pharma-form input {
   display: block;

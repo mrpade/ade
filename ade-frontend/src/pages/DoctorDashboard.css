@@ -63,18 +63,42 @@
 .status-indicator.green { background-color: var(--primary-color); }
 .status-indicator.red { background-color: var(--accent-color); }
 
-.btn.toggle {
-  margin-top: 10px;
+.toggle-and-edit{
+  width: fit-content;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+.toggle-btn{
+  width: 25px;
+  height: 45px;
+  display: flex;
+  align-items: start;
+  background-color: #ccc;
+  border-radius: 50px;
+  padding: 2px;
+}
+.toggle-switch {
+  width: 21px;
+  aspect-ratio: 1/1;
+  background-color: var(--primary-color);
+  border-radius: 50%;
+  transition: transform .3s ease-in-out;
 }
 
-#btn-edit, .btn-logout {
+#btn-edit {
   margin: 25px 0;
+  border: none;
 }
 
 #btn-edit:hover{
     background-color: var(--accent-color);
 }
 .btn-logout { background-color: var(--accent-color); color: white; }
+.btn-logout:hover {
+  background-color: #b8104c;
+}
 
 .sidebar-menu {
   list-style: none;
@@ -147,16 +171,17 @@
 }
 
 .btn {
-  flex: 1;
-  padding: 8px 10px;
   border: none;
-  border-radius: 4px;
   font-weight: bold;
   cursor: pointer;
 }
 
-.btn.green { background-color: #007f5f; color: white; }
-.btn.pink { background-color: #e91e63; color: white; }
+.btn.green { background-color: var(--primary-color); color: white; }
+.btn.pink { background-color: var(--accent-color); color: white; }
+
+.btn.pink{
+  background-color: #b8104c;
+}
 
 .doc-form input,
 .doc-form textarea {

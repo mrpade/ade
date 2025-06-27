@@ -1,8 +1,8 @@
 // src/components/AdminDashboard.jsx
 
-import React, { useContext, useEffect, useState } from 'react';
-import api from '../services/api';
-import { AuthContext } from '../context/AuthContext';
+import React, { useContext, useEffect, useState } from "react";
+import api from "../services/api";
+import { AuthContext } from "../context/AuthContext";
 import {
   fetchSymptoms,
   fetchQuestions,
@@ -14,25 +14,28 @@ import {
   createDisease,
   updateDisease,
   createQuestion,
+  updateQuestion,
   addOption,
+  updateOption,
   addImpact,
+  updateImpact,
   deleteQuestion,
   deleteOption,
-  deleteImpact
-} from '../api/admin'; // your admin-specific API methods
-import './AdminDashboard.css';
+  deleteImpact,
+} from "../api/admin"; // your admin-specific API methods
+import "./AdminDashboard.css";
 
 export default function AdminDashboard() {
   const { role } = useContext(AuthContext);
 
   // --- UI State ---
-  const [section, setSection] = useState('symptoms');
+  const [section, setSection] = useState("symptoms");
   const [symptoms, setSymptoms] = useState([]);
   const [page, setPage] = useState(1);
   const perPage = 15;
 
   const [selectedSymptom, setSelectedSymptom] = useState(null);
-  const [viewType, setViewType] = useState('questions'); // 'questions' | 'options' | 'scores'
+  const [viewType, setViewType] = useState("questions"); // 'questions' | 'options' | 'scores'
 
   const [questions, setQuestions] = useState([]);
   const [options, setOptions] = useState([]);
@@ -44,35 +47,45 @@ export default function AdminDashboard() {
   const [diseasePage, setDiseasePage] = useState(1);
   const [selectedDisease, setSelectedDisease] = useState(null);
   const [diseaseForm, setDiseaseForm] = useState({
-    Nom: '',
-    Symptomes: '',
-    Causes: '',
-    Transmission: '',
-    Traitements: '',
-    Gravite_sur_5: '',
-    Contagieuse: '',
-    Zone_geographique: '',
-    Notes: ''
+    Nom: "",
+    Symptomes: "",
+    Causes: "",
+    Transmission: "",
+    Traitements: "",
+    Gravite_sur_5: "",
+    Contagieuse: "",
+    Zone_geographique: "",
+    Notes: "",
   });
   const [diseaseSymptoms, setDiseaseSymptoms] = useState([]);
-  const [newSymptom, setNewSymptom] = useState('');
+  const [newSymptom, setNewSymptom] = useState("");
   const [symptomSuggestions, setSymptomSuggestions] = useState([]);
   const [showSymSuggestions, setShowSymSuggestions] = useState(false);
 
   const [showQuestionForm, setShowQuestionForm] = useState(false);
-  const [newQuestion, setNewQuestion] = useState({ text: '', type: 'yes_no' });
+  const [newQuestion, setNewQuestion] = useState({ text: "", type: "yes_no" });
 
   const [showOptionForm, setShowOptionForm] = useState(false);
-  const [newOption, setNewOption] = useState({ questionId: '', values: [''] });
+  const [newOption, setNewOption] = useState({ questionId: "", values: [""] });
 
   const [showScoreForm, setShowScoreForm] = useState(false);
-  const [newScore, setNewScore] = useState({ optionId: '', diseaseId: '', value: '' });
+  const [newScore, setNewScore] = useState({
+    optionId: "",
+    diseaseId: "",
+    value: "",
+  });
+
+  const [editQuestion, setEditQuestion] = useState(null);
+  const [editQuestionData, setEditQuestionData] = useState({
+    text: "",
+    type: "yes_no",
+  });
 
   // --- Load Symptoms ---
   useEffect(() => {
-    if (role !== 'admin') return;
+    if (role !== "admin") return;
     (async () => {
-      const { data } = await fetchSymptoms({ page, perPage, sort: 'name' });
+      const { data } = await fetchSymptoms({ page, perPage, sort: "name" });
       setSymptoms(data);
     })();
   }, [role, page]);
@@ -83,13 +96,13 @@ export default function AdminDashboard() {
 
     const loadDetail = async () => {
       const id = selectedSymptom.id;
-      if (viewType === 'questions') {
+      if (viewType === "questions") {
         const { data } = await fetchQuestions({ symptom: id });
         setQuestions(data);
-      } else if (viewType === 'options') {
+      } else if (viewType === "options") {
         const { data } = await fetchOptions(id);
         setOptions(data);
-      } else if (viewType === 'scores') {
+      } else if (viewType === "scores") {
         const { data } = await fetchScores(id);
         setScores(data);
         const optRes = await fetchOptions(id);
@@ -108,13 +121,17 @@ export default function AdminDashboard() {
       setRelatedDiseases(data);
     };
     loadDiseases();
+    setEditQuestion(null);
   }, [selectedSymptom]);
 
   // --- Load Diseases list ---
   useEffect(() => {
-    if (section !== 'diseases') return;
+    if (section !== "diseases") return;
     const load = async () => {
-      const { data } = await fetchDiseases({ page: diseasePage, perPage: perPage });
+      const { data } = await fetchDiseases({
+        page: diseasePage,
+        perPage: perPage,
+      });
       setDiseaseList(data);
     };
     load();
@@ -126,51 +143,51 @@ export default function AdminDashboard() {
     const loadDetail = async () => {
       const { data } = await fetchDisease(selectedDisease.id);
       setDiseaseForm({
-        Nom: data.disease.Nom || '',
-        Symptomes: data.disease.Symptomes || '',
-        Causes: data.disease.Causes || '',
-        Transmission: data.disease.Transmission || '',
-        Traitements: data.disease.Traitements || '',
-        Gravite_sur_5: data.disease.Gravite_sur_5 || '',
-        Contagieuse: data.disease.Contagieuse || '',
-        Zone_geographique: data.disease.Zone_geographique || '',
-        Notes: data.disease.Notes || ''
+        Nom: data.disease.Nom || "",
+        Symptomes: data.disease.Symptomes || "",
+        Causes: data.disease.Causes || "",
+        Transmission: data.disease.Transmission || "",
+        Traitements: data.disease.Traitements || "",
+        Gravite_sur_5: data.disease.Gravite_sur_5 || "",
+        Contagieuse: data.disease.Contagieuse || "",
+        Zone_geographique: data.disease.Zone_geographique || "",
+        Notes: data.disease.Notes || "",
       });
       setDiseaseSymptoms(data.symptoms);
     };
     loadDetail();
   }, [selectedDisease]);
 
-  const handleCreateQuestion = async e => {
+  const handleCreateQuestion = async (e) => {
     e.preventDefault();
     if (!selectedSymptom) return;
     try {
       await createQuestion({
         question_text: newQuestion.text,
         question_type: newQuestion.type,
-        trigger_symptom_id: selectedSymptom.id
+        trigger_symptom_id: selectedSymptom.id,
       });
       const { data } = await fetchQuestions({ symptom: selectedSymptom.id });
       setQuestions(data);
       setShowQuestionForm(false);
-      setNewQuestion({ text: '', type: 'yes_no' });
+      setNewQuestion({ text: "", type: "yes_no" });
     } catch (err) {
-      console.error('create question error', err);
+      console.error("create question error", err);
     }
   };
 
-  const handleCreateOption = async e => {
+  const handleCreateOption = async (e) => {
     e.preventDefault();
     try {
       const qId = parseInt(newOption.questionId, 10);
-      const q = questions.find(q => q.id === qId);
+      const q = questions.find((q) => q.id === qId);
       if (!q) return;
-      if (q.question_type === 'yes_no') {
-        await addOption(qId, { option_label: 'Yes' });
-        await addOption(qId, { option_label: 'No' });
+      if (q.question_type === "yes_no") {
+        await addOption(qId, { option_label: "Yes" });
+        await addOption(qId, { option_label: "No" });
       } else {
         for (const val of newOption.values) {
-          if (val && val.trim() !== '') {
+          if (val && val.trim() !== "") {
             await addOption(qId, { option_label: val });
           }
         }
@@ -178,95 +195,175 @@ export default function AdminDashboard() {
       const { data } = await fetchOptions(selectedSymptom.id);
       setOptions(data);
       setShowOptionForm(false);
-      setNewOption({ questionId: '', values: [''] });
+      setNewOption({ questionId: "", values: [""] });
     } catch (err) {
-      console.error('create option error', err);
+      console.error("create option error", err);
     }
   };
 
-  const handleCreateScore = async e => {
+  const handleCreateScore = async (e) => {
     e.preventDefault();
     try {
       await addImpact(newScore.optionId, {
         disease_id: newScore.diseaseId,
-        score_delta: newScore.value
+        score_delta: newScore.value,
       });
       const { data } = await fetchScores(selectedSymptom.id);
       setScores(data);
       setShowScoreForm(false);
-      setNewScore({ optionId: '', diseaseId: '', value: '' });
+      setNewScore({ optionId: "", diseaseId: "", value: "" });
     } catch (err) {
-      console.error('create score error', err);
+      console.error("create score error", err);
     }
   };
 
-  const handleDeleteQuestion = async id => {
+  const handleDeleteQuestion = async (id) => {
     if (!selectedSymptom) return;
     try {
       await deleteQuestion(id);
       const { data } = await fetchQuestions({ symptom: selectedSymptom.id });
       setQuestions(data);
     } catch (err) {
-      console.error('delete question error', err);
+      console.error("delete question error", err);
     }
   };
 
-  const handleDeleteOption = async id => {
+  const handleDeleteOption = async (id) => {
     if (!selectedSymptom) return;
     try {
       await deleteOption(id);
       const { data } = await fetchOptions(selectedSymptom.id);
       setOptions(data);
     } catch (err) {
-      console.error('delete option error', err);
+      console.error("delete option error", err);
     }
   };
 
-  const handleDeleteScore = async id => {
+  const handleDeleteScore = async (id) => {
     if (!selectedSymptom) return;
     try {
       await deleteImpact(id);
       const { data } = await fetchScores(selectedSymptom.id);
       setScores(data);
     } catch (err) {
-      console.error('delete score error', err);
+      console.error("delete score error", err);
     }
   };
 
-  const handleDiseaseFormChange = e => {
-    const { name, value } = e.target;
-    setDiseaseForm(f => ({ ...f, [name]: value }));
+  const handleEditQuestionClick = (q) => {
+    setEditQuestion(JSON.parse(JSON.stringify(q)));
+    setEditQuestionData({ text: q.question_text, type: q.question_type });
   };
 
-  const handleSaveDisease = async e => {
+  const handleUpdateQuestion = async (e) => {
+    e.preventDefault();
+    try {
+      await updateQuestion(editQuestion.id, {
+        question_text: editQuestionData.text,
+        question_type: editQuestionData.type,
+      });
+      const { data } = await fetchQuestions({ symptom: selectedSymptom.id });
+      setQuestions(data);
+      const updated = data.find((q) => q.id === editQuestion.id);
+      setEditQuestion(updated);
+    } catch (err) {
+      console.error("update question error", err);
+    }
+  };
+
+  const handleOptionLabelChange = (id, val) => {
+    setEditQuestion((q) => ({
+      ...q,
+      options: q.options.map((o) =>
+        o.id === id ? { ...o, option_label: val } : o
+      ),
+    }));
+  };
+
+  const handleSaveOption = async (id) => {
+    const opt = editQuestion.options.find((o) => o.id === id);
+    if (!opt) return;
+    try {
+      await updateOption(id, { option_label: opt.option_label });
+      const { data } = await fetchQuestions({ symptom: selectedSymptom.id });
+      setQuestions(data);
+      const updated = data.find((q) => q.id === editQuestion.id);
+      setEditQuestion(updated);
+    } catch (err) {
+      console.error("update option error", err);
+    }
+  };
+
+  const handleImpactChange = (id, val) => {
+    setEditQuestion((q) => ({
+      ...q,
+      options: q.options.map((o) => ({
+        ...o,
+        impacts: o.impacts.map((im) =>
+          im.id === id ? { ...im, score_delta: val } : im
+        ),
+      })),
+    }));
+  };
+
+  const handleSaveImpact = async (id) => {
+    let impact;
+    for (const o of editQuestion.options) {
+      impact = o.impacts.find((im) => im.id === id);
+      if (impact) break;
+    }
+    if (!impact) return;
+    try {
+      await updateImpact(id, {
+        disease_id: impact.disease_id,
+        score_delta: impact.score_delta,
+      });
+      const { data } = await fetchQuestions({ symptom: selectedSymptom.id });
+      setQuestions(data);
+      const updated = data.find((q) => q.id === editQuestion.id);
+      setEditQuestion(updated);
+    } catch (err) {
+      console.error("update impact error", err);
+    }
+  };
+
+  const handleDiseaseFormChange = (e) => {
+    const { name, value } = e.target;
+    setDiseaseForm((f) => ({ ...f, [name]: value }));
+  };
+
+  const handleSaveDisease = async (e) => {
     e.preventDefault();
     try {
       if (selectedDisease && selectedDisease.id) {
         const { data } = await updateDisease(selectedDisease.id, {
           ...diseaseForm,
-          symptoms: diseaseSymptoms.map(s => s.name)
+          symptoms: diseaseSymptoms.map((s) => s.name),
         });
         setSelectedDisease(data.disease);
         setDiseaseSymptoms(data.symptoms);
       } else {
-        await createDisease({ ...diseaseForm, symptoms: diseaseSymptoms.map(s => s.name) });
+        await createDisease({
+          ...diseaseForm,
+          symptoms: diseaseSymptoms.map((s) => s.name),
+        });
         setDiseasePage(1);
       }
     } catch (err) {
-      console.error('save disease error', err);
+      console.error("save disease error", err);
     }
   };
 
-  const handleAddSymptomToDisease = e => {
+  const handleAddSymptomToDisease = (e) => {
     e.preventDefault();
     if (!newSymptom.trim()) return;
-    setDiseaseSymptoms(s => [...s, { id: null, name: newSymptom.trim() }]);
-    setNewSymptom('');
+    setDiseaseSymptoms((s) => [...s, { id: null, name: newSymptom.trim() }]);
+    setNewSymptom("");
     setShowSymSuggestions(false);
   };
 
-  const handleRemoveSymptom = name => {
-    setDiseaseSymptoms(s => s.filter(sym => sym.name !== name));
+  const handleRemoveSymptom = (name) => {
+    setDiseaseSymptoms((s) => s.filter((sym) => sym.name !== name));
   };
 
   // Fetch symptom suggestions when user types
@@ -277,41 +374,40 @@ export default function AdminDashboard() {
     }
     const timeout = setTimeout(async () => {
       try {
-        const { data } = await api.get('/symptomes', {
-          params: { q: newSymptom.trim(), full: true }
+        const { data } = await api.get("/symptomes", {
+          params: { q: newSymptom.trim(), full: true },
         });
         setSymptomSuggestions(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error('symptom suggestions error', err);
+        console.error("symptom suggestions error", err);
         setSymptomSuggestions([]);
       }
     }, 300);
     return () => clearTimeout(timeout);
   }, [newSymptom]);
 
-  if (role !== 'admin') return <p>Access Denied</p>;
+  if (role !== "admin") return <p>Access Denied</p>;
 
   return (
-    
     <div className="admin-dashboard">
       {/* Sidebar */}
       <aside className="sidebar">
         <ul>
           <li
-            className={section === 'users' ? 'active' : ''}
-            onClick={() => setSection('users')}
+            className={section === "users" ? "active" : ""}
+            onClick={() => setSection("users")}
           >
             Utilisateurs
           </li>
           <li
-            className={section === 'diseases' ? 'active' : ''}
-            onClick={() => setSection('diseases')}
+            className={section === "diseases" ? "active" : ""}
+            onClick={() => setSection("diseases")}
           >
             Maladies
           </li>
           <li
-            className={section === 'symptoms' ? 'active' : ''}
-            onClick={() => setSection('symptoms')}
+            className={section === "symptoms" ? "active" : ""}
+            onClick={() => setSection("symptoms")}
           >
             Symptômes
           </li>
@@ -320,7 +416,7 @@ export default function AdminDashboard() {
 
       {/* Main Content */}
       <section className="main-content">
-        {section === 'symptoms' && (
+        {section === "symptoms" && (
           <>
             {/* Symptom Grid */}
             <div className="symptom-grid">
@@ -329,12 +425,12 @@ export default function AdminDashboard() {
                   key={sym.id}
                   className={
                     selectedSymptom?.id === sym.id
-                      ? 'symptom-btn selected'
-                      : 'symptom-btn'
+                      ? "symptom-btn selected"
+                      : "symptom-btn"
                   }
                   onClick={() => {
                     setSelectedSymptom(sym);
-                    setViewType('questions');
+                    setViewType("questions");
                   }}
                 >
                   {sym.name}
@@ -347,21 +443,22 @@ export default function AdminDashboard() {
               <button
                 disabled={page === 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
-                className='pagination-button'
+                className="pagination-button"
               >
                 Précédent
               </button>
-              <button 
+              <button
                 onClick={() => setPage((p) => p + 1)}
-                className='pagination-button'
+                className="pagination-button"
               >
-                Suivant</button>
+                Suivant
+              </button>
             </div>
 
             {/* Detail Cards */}
             <div className="detail-cards">
               {/* Top‐Left Card */}
-              <div className="admin-dashboard-card" id='questions-card'>
+              <div className="admin-dashboard-card" id="questions-card">
                 <div className="card-header">
                   <h2>
                     {viewType.charAt(0).toUpperCase() + viewType.slice(1)}
@@ -376,7 +473,7 @@ export default function AdminDashboard() {
                   </select>
                 </div>
                 <div className="card-body">
-                  {viewType === 'questions' && (
+                  {viewType === "questions" && (
                     <>
                       {questions.length > 0 && (
                         <ol>
@@ -389,38 +486,64 @@ export default function AdminDashboard() {
                               >
                                 Supprimer
                               </button>
+                              <button
+                                className="edit-btn"
+                                onClick={() => handleEditQuestionClick(q)}
+                              >
+                                Éditer
+                              </button>
                             </li>
                           ))}
                         </ol>
-                        )}
+                      )}
                       {showQuestionForm ? (
-                        <form onSubmit={handleCreateQuestion} className="admin-form">
+                        <form
+                          onSubmit={handleCreateQuestion}
+                          className="admin-form"
+                        >
                           <input
                             value={newQuestion.text}
-                            onChange={e => setNewQuestion(n => ({ ...n, text: e.target.value }))}
+                            onChange={(e) =>
+                              setNewQuestion((n) => ({
+                                ...n,
+                                text: e.target.value,
+                              }))
+                            }
                             placeholder="Question"
                             required
                           />
                           <select
                             value={newQuestion.type}
-                            onChange={e => setNewQuestion(n => ({ ...n, type: e.target.value }))}
+                            onChange={(e) =>
+                              setNewQuestion((n) => ({
+                                ...n,
+                                type: e.target.value,
+                              }))
+                            }
                           >
                             <option value="yes_no">Oui/Non</option>
-                            <option value="multiple_choice">Choix multiple</option>
+                            <option value="multiple_choice">
+                              Choix multiple
+                            </option>
                             <option value="number">Nombre</option>
                             <option value="scale">Échelle</option>
                           </select>
-                          <button type="submit" className="add-btn">Valider</button>
+                          <button type="submit" className="add-btn">
+                            Valider
+                          </button>
                         </form>
                       ) : (
-                        <button className="add-btn" onClick={() => setShowQuestionForm(true)}>
+                        <button
+                          className="add-btn"
+                          onClick={() => setShowQuestionForm(true)}
+                        >
                           Ajouter une question
                         </button>
                       )}
                     </>
                   )}
 
-                  {viewType === 'options' && (
+                  {viewType === "options" && (
                     <>
                       {options.length > 0 && (
                         <ul>
@@ -436,54 +559,76 @@ export default function AdminDashboard() {
                             </li>
                           ))}
                         </ul>
-                        )}
+                      )}
                       {showOptionForm ? (
-                        <form onSubmit={handleCreateOption} className="admin-form">
+                        <form
+                          onSubmit={handleCreateOption}
+                          className="admin-form"
+                        >
                           <select
                             value={newOption.questionId}
-                            onChange={e => {
+                            onChange={(e) => {
                               const id = e.target.value;
-                              setNewOption(o => ({ ...o, questionId: id }));
+                              setNewOption((o) => ({ ...o, questionId: id }));
                             }}
                             required
                           >
                             <option value="">-- Question --</option>
-                            {questions.map(q => (
-                              <option key={q.id} value={q.id}>{q.question_text}</option>
+                            {questions.map((q) => (
+                              <option key={q.id} value={q.id}>
+                                {q.question_text}
+                              </option>
                             ))}
                           </select>
                           {(() => {
-                            const q = questions.find(q => q.id === parseInt(newOption.questionId,10));
-                            if (q?.question_type === 'yes_no') {
-                              return <p>Options "Yes" et "No" ajoutées automatiquement</p>;
+                            const q = questions.find(
+                              (q) => q.id === parseInt(newOption.questionId, 10)
+                            );
+                            if (q?.question_type === "yes_no") {
+                              return (
+                                <p>
+                                  Options "Yes" et "No" ajoutées automatiquement
+                                </p>
+                              );
                             }
-                            const count = q?.question_type === 'multiple_choice' ? 4 : 1;
+                            const count =
+                              q?.question_type === "multiple_choice" ? 4 : 1;
                             const fields = [];
-                            for (let i=0;i<count;i++) {
+                            for (let i = 0; i < count; i++) {
                               fields.push(
                                 <input
                                   key={i}
-                                  value={newOption.values[i] || ''}
-                                  onChange={e => {
+                                  value={newOption.values[i] || ""}
+                                  onChange={(e) => {
                                     const vals = [...newOption.values];
                                     vals[i] = e.target.value;
-                                    setNewOption(o => ({ ...o, values: vals }));
+                                    setNewOption((o) => ({
+                                      ...o,
+                                      values: vals,
+                                    }));
                                   }}
-                                  placeholder={`Option ${i+1}`}
+                                  placeholder={`Option ${i + 1}`}
                                 />
                               );
                             }
                             return fields;
                           })()}
-                          <button type="submit" className="add-btn">Valider</button>
+                          <button type="submit" className="add-btn">
+                            Valider
+                          </button>
                         </form>
                       ) : (
-                        <button className="add-btn" onClick={() => setShowOptionForm(true)}>Ajouter une option</button>
+                        <button
+                          className="add-btn"
+                          onClick={() => setShowOptionForm(true)}
+                        >
+                          Ajouter une option
+                        </button>
                       )}
                     </>
                   )}
 
-                  {viewType === 'scores' && (
+                  {viewType === "scores" && (
                     <>
                       {scores.length > 0 && (
                         <ul>
@@ -499,43 +644,72 @@ export default function AdminDashboard() {
                             </li>
                           ))}
                         </ul>
-                        )}
+                      )}
                       {showScoreForm ? (
-                        <form onSubmit={handleCreateScore} className="admin-form">
+                        <form
+                          onSubmit={handleCreateScore}
+                          className="admin-form"
+                        >
                           <select
                             value={newScore.optionId}
-                            onChange={e => setNewScore(s => ({ ...s, optionId: e.target.value }))}
+                            onChange={(e) =>
+                              setNewScore((s) => ({
+                                ...s,
+                                optionId: e.target.value,
+                              }))
+                            }
                             required
                           >
                             <option value="">-- Option --</option>
-                            {options.map(o => (
+                            {options.map((o) => (
                               <option key={o.id} value={o.id}>
-                                {o.question_text ? `${o.question_text} - ${o.text}` : o.text}
+                                {o.question_text
+                                  ? `${o.question_text} - ${o.text}`
+                                  : o.text}
                               </option>
                             ))}
                           </select>
                           <select
                             value={newScore.diseaseId}
-                            onChange={e => setNewScore(s => ({ ...s, diseaseId: e.target.value }))}
+                            onChange={(e) =>
+                              setNewScore((s) => ({
+                                ...s,
+                                diseaseId: e.target.value,
+                              }))
+                            }
                             required
                           >
                             <option value="">-- Maladie --</option>
-                            {relatedDiseases.map(d => (
-                              <option key={d.id} value={d.id}>{d.name}</option>
+                            {relatedDiseases.map((d) => (
+                              <option key={d.id} value={d.id}>
+                                {d.name}
+                              </option>
                             ))}
                           </select>
                           <input
                             type="number"
                             step="0.01"
                             value={newScore.value}
-                            onChange={e => setNewScore(s => ({ ...s, value: e.target.value }))}
+                            onChange={(e) =>
+                              setNewScore((s) => ({
+                                ...s,
+                                value: e.target.value,
+                              }))
+                            }
                             placeholder="Score"
                             required
                           />
-                          <button type="submit" className="add-btn">Valider</button>
+                          <button type="submit" className="add-btn">
+                            Valider
+                          </button>
                         </form>
                       ) : (
-                        <button className="add-btn" onClick={() => setShowScoreForm(true)}>Ajouter un score</button>
+                        <button
+                          className="add-btn"
+                          onClick={() => setShowScoreForm(true)}
+                        >
+                          Ajouter un score
+                        </button>
                       )}
                     </>
                   )}
@@ -543,32 +717,124 @@ export default function AdminDashboard() {
               </div>
 
               {/* Bottom‐Right Card */}
-              <div className="admin-dashboard-card" id='maladies-liee-card'>
+              <div className="admin-dashboard-card" id="maladies-liee-card">
                 <h2>Maladies liées</h2>
                 {relatedDiseases.length === 0 ? (
                   <p>Aucune maladie</p>
                 ) : (
                   <ul>
-                    {relatedDiseases.map(d => (
+                    {relatedDiseases.map((d) => (
                       <li key={d.id}>{d.name}</li>
                     ))}
                   </ul>
                 )}
               </div>
             </div>
+
+            {editQuestion && (
+              <div className="edit-container">
+                <div className="admin-dashboard-card" id="edits">
+                  <h2>Éditer la question</h2>
+                  <form onSubmit={handleUpdateQuestion} className="admin-form">
+                    <input
+                      value={editQuestionData.text}
+                      onChange={(e) =>
+                        setEditQuestionData((d) => ({
+                          ...d,
+                          text: e.target.value,
+                        }))
+                      }
+                      placeholder="Question"
+                      required
+                    />
+                    <select
+                      value={editQuestionData.type}
+                      onChange={(e) =>
+                        setEditQuestionData((d) => ({
+                          ...d,
+                          type: e.target.value,
+                        }))
+                      }
+                    >
+                      <option value="yes_no">Oui/Non</option>
+                      <option value="multiple_choice">Choix multiple</option>
+                      <option value="number">Nombre</option>
+                      <option value="scale">Échelle</option>
+                    </select>
+                    <div className="edit-datas">
+                      <button type="submit" className="add-btn">
+                        Sauvegarder
+                      </button>
+                      <button
+                        type="button"
+                        className="delete-btn"
+                        onClick={() => setEditQuestion(null)}
+                      >
+                        Fermer
+                      </button>
+                    </div>
+                  </form>
+
+                  <h3>Options</h3>
+                  <div className="edits-option-container">
+                    {editQuestion.options &&
+                      editQuestion.options.map((o) => (
+                        <div key={o.id} className="edit-option">
+                          <input
+                            value={o.option_label}
+                            onChange={(e) =>
+                              handleOptionLabelChange(o.id, e.target.value)
+                            }
+                          />
+                          <button
+                            type="button"
+                            className="edit-btn"
+                            onClick={() => handleSaveOption(o.id)}
+                          >
+                            Enregistrer
+                          </button>
+                          {o.impacts &&
+                            o.impacts.map((im) => (
+                              <div key={im.id} className="edit-score">
+                                <span>
+                                  {im.DiseasesList ? im.DiseasesList.Nom : ""}
+                                </span>
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  value={im.score_delta}
+                                  onChange={(e) =>
+                                    handleImpactChange(im.id, e.target.value)
+                                  }
+                                />
+                                <button
+                                  type="button"
+                                  className="edit-btn"
+                                  onClick={() => handleSaveImpact(im.id)}
+                                >
+                                  Enregistrer
+                                </button>
+                              </div>
+                            ))}
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
 
-        {section === 'diseases' && (
+        {section === "diseases" && (
           <>
             <div className="symptom-grid">
-              {diseaseList.map(d => (
+              {diseaseList.map((d) => (
                 <button
                   key={d.id}
                   className={
                     selectedDisease?.id === d.id
-                      ? 'symptom-btn selected'
-                      : 'symptom-btn'
+                      ? "symptom-btn selected"
+                      : "symptom-btn"
                   }
                   onClick={() => {
                     setSelectedDisease(d);
@@ -582,15 +848,15 @@ export default function AdminDashboard() {
                 onClick={() => {
                   setSelectedDisease({});
                   setDiseaseForm({
-                    Nom: '',
-                    Symptomes: '',
-                    Causes: '',
-                    Transmission: '',
-                    Traitements: '',
-                    Gravite_sur_5: '',
-                    Contagieuse: '',
-                    Zone_geographique: '',
-                    Notes: ''
+                    Nom: "",
+                    Symptomes: "",
+                    Causes: "",
+                    Transmission: "",
+                    Traitements: "",
+                    Gravite_sur_5: "",
+                    Contagieuse: "",
+                    Zone_geographique: "",
+                    Notes: "",
                   });
                   setDiseaseSymptoms([]);
                 }}
@@ -601,13 +867,13 @@ export default function AdminDashboard() {
             <div className="pagination">
               <button
                 disabled={diseasePage === 1}
-                onClick={() => setDiseasePage(p => Math.max(1, p - 1))}
+                onClick={() => setDiseasePage((p) => Math.max(1, p - 1))}
                 className="pagination-button"
               >
                 Précédent
               </button>
               <button
-                onClick={() => setDiseasePage(p => p + 1)}
+                onClick={() => setDiseasePage((p) => p + 1)}
                 className="pagination-button"
               >
                 Suivant
@@ -615,8 +881,8 @@ export default function AdminDashboard() {
             </div>
             {selectedDisease && (
               <div className="detail-cards">
-                <div className="admin-dashboard-card" id='disease-info-card'>
-                  <h2>{selectedDisease.id ? 'Éditer' : 'Nouvelle'} maladie</h2>
+                <div className="admin-dashboard-card" id="disease-info-card">
+                  <h2>{selectedDisease.id ? "Éditer" : "Nouvelle"} maladie</h2>
                   <form onSubmit={handleSaveDisease} className="admin-form">
                     <p>Nom</p>
                     <input
@@ -675,16 +941,21 @@ export default function AdminDashboard() {
                       onChange={handleDiseaseFormChange}
                       placeholder="Notes"
                     />
-                    <button type="submit" className="add-btn">Enregistrer</button>
+                    <button type="submit" className="add-btn">
+                      Enregistrer
+                    </button>
                   </form>
                 </div>
-                <div className="admin-dashboard-card" id='disease-symptoms-card'>
+                <div
+                  className="admin-dashboard-card"
+                  id="disease-symptoms-card"
+                >
                   <h2>Symptômes liés</h2>
                   {diseaseSymptoms.length === 0 ? (
                     <p>Aucun symptôme</p>
                   ) : (
                     <ul>
-                      {diseaseSymptoms.map(s => (
+                      {diseaseSymptoms.map((s) => (
                         <li key={s.name}>
                           {s.name}
                           <button
@@ -697,26 +968,41 @@ export default function AdminDashboard() {
                       ))}
                     </ul>
                   )}
-                  <form onSubmit={handleAddSymptomToDisease} className="admin-form" autoComplete="off">
-                    <div style={{ position: 'relative', width: '100%' }}>
+                  <form
+                    onSubmit={handleAddSymptomToDisease}
+                    className="admin-form"
+                    autoComplete="off"
+                  >
+                    <div style={{ position: "relative", width: "100%" }}>
                       <input
                         value={newSymptom}
-                        onChange={e => { setNewSymptom(e.target.value); setShowSymSuggestions(true); }}
+                        onChange={(e) => {
+                          setNewSymptom(e.target.value);
+                          setShowSymSuggestions(true);
+                        }}
                         onFocus={() => setShowSymSuggestions(true)}
                         placeholder="Nouveau symptôme"
                         className="search-input"
                       />
                       {showSymSuggestions && symptomSuggestions.length > 0 && (
                         <ul className="suggestions-list">
-                          {symptomSuggestions.map(s => (
-                            <li key={s.id || s.name} onMouseDown={() => { setNewSymptom(s.name); setShowSymSuggestions(false); }}>
+                          {symptomSuggestions.map((s) => (
+                            <li
+                              key={s.id || s.name}
+                              onMouseDown={() => {
+                                setNewSymptom(s.name);
+                                setShowSymSuggestions(false);
+                              }}
+                            >
                               {s.name}
                             </li>
                           ))}
                         </ul>
                       )}
                     </div>
-                    <button type="submit" className="add-btn">Ajouter</button>
+                    <button type="submit" className="add-btn">
+                      Ajouter
+                    </button>
                   </form>
                 </div>
               </div>

@@ -49,6 +49,7 @@
   transition: border-color 0.3s;
 }
 .symptom-btn:hover {
+  background-color: transparent;
   border-color: var(--primary-color);
 }
 .symptom-btn.selected {
@@ -80,6 +81,10 @@
   margin-bottom: 1rem;
   
 }
+ol {
+  width: 100%;
+}
+
 #maladies-liee-card{
   width: fit-content;
 
@@ -117,12 +122,27 @@
   margin-top: 0.5rem;
 }
 
+ol{
+  position: relative;
+}
+ol li{
+  margin-block: 10px;
+}
+.edit-btn{
+  position: absolute;
+  right: 0;
+  margin-right: 10px;
+}
 .delete-btn {
   margin-left: 0.5rem;
   background: transparent;
   border: none;
   color: red;
   cursor: pointer;
+}
+.delete-btn:hover {
+  background-color: red;
+  color: #fff;
 }
 
 .symptom-grid .add-btn {
@@ -143,4 +163,36 @@
 
 #disease-symptoms-card {
   width: 38%;
+}
+
+.edit-container {
+  width: 100%;
+}
+#edits {
+  width: 100%;
+}
+.edit-datas{
+  display: flex;
+  justify-content: end;
+  margin-block: 10px;
+}
+.edit-datas button {
+  margin-inline: 5px;
+}
+.edits-option-container {
+  display: block;
+}
+.edit-option {
+  display: flex;
+  margin-block: 10px;
+}
+.edit-option  button{
+  margin-inline-end: 0;
+}
+
+.edit-score {
+  margin-left: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }

@@ -150,10 +150,12 @@ export default function DoctorDashboard() {
             />
           </h2>
           <p><i>ONMC No. {doctor.onmc}</i></p>
-          <button className="btn toggle" onClick={handleToggleAvailability}>
-            {doctor.is_available ? 'Se mettre hors ligne' : 'Se rendre disponible'}
-          </button>
+          <div className='toggle-and-edit'>
           <button id="btn-edit">Éditer mon profil</button>
+          <div className='toggle-btn'>
+            <div className='toggle-switch' onClick={handleToggleAvailability}></div>
+          </div>
+          </div>
           <ul className="sidebar-menu">
             <li>Mes revenus</li>
             <li>Historique</li>
