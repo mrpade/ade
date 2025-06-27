@@ -81,8 +81,6 @@ export default function AdminDashboard() {
     type: "yes_no",
   });
 
-  const [editQuestion, setEditQuestion] = useState(null);
-  const [editQuestionData, setEditQuestionData] = useState({ text: '', type: 'yes_no' });
 
   // --- Load Symptoms ---
   useEffect(() => {

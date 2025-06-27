@@ -153,7 +153,10 @@ export default function DoctorDashboard() {
           <div className='toggle-and-edit'>
           <button id="btn-edit">Éditer mon profil</button>
           <div className='toggle-btn'>
-            <div className='toggle-switch' onClick={handleToggleAvailability}></div>
+            <div
+              className={`toggle-switch ${doctor.is_available ? 'active' : ''}`}
+              onClick={handleToggleAvailability}
+            ></div>
           </div>
           </div>
           <ul className="sidebar-menu">
