@@ -84,7 +84,13 @@
   aspect-ratio: 1/1;
   background-color: var(--primary-color);
   border-radius: 50%;
-  transition: transform .3s ease-in-out;
+  cursor: pointer;
+  transition: transform .3s ease-in-out, background-color .3s ease-in-out;
+}
+
+.toggle-switch.active {
+  transform: translateY(20px);
+  background-color: var(--accent-color);
 }
 
 #btn-edit {
